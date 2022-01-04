@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Blog - Intro to Recoil.js</title>
+    <link rel="stylesheet" type="text/css" href="../css/composeconference.css" />
+  </head>
+  <body>
+    <header>
+      <div class="heading">
+        <div class="logo">
+          <div style="float: left"></div>
+          <div>
+            <a href="../">japiirainen</a>
+          </div>
+        </div>
+        <nav><a href="../">home</a> <a href="../about.html">about</a></nav>
+      </div>
+    </header>
+
+    <main class="markdown-body" role="main">
+      <h1>Intro to Recoil.js</h1>
+      <div class="info">
+  <em>Posted on June  7, 2020  by Joona </em><br /><br />
+</div>
+
+<p>RecoilJS is yet another state management library for React. It is maintained and open-sourced by Facebook. But why would we need another state management library since we already have so many? Well, I’m not quite qualified enough to answer this question so you should read recoilJS <a href="https://recoiljs.org/">docs</a>. But at least in my eyes recoilJS makes more complex state management simpler and removes a lot of the boilerplate that would otherwise be involved. RecoilJS syntax is Reactish as they said in the docs and it almost feels like it’s a part of the React API.</p>
+<h2 id="building-a-simple-expense-tracker">Building a simple expense tracker</h2>
+<p>This app is highly based on Brad Traversy’s expense tracker from his vanilla javascript projects. I just thought this would be an excellent little app that needs some state management to work. So I will be showing you how to create this fun little app using React with recoilJS.</p>
+<p>This app will consist of components that will be able to:</p>
+<ul>
+<li>Display transaction items</li>
+<li>Show balance, expense and income totals</li>
+<li>Add new transaction that reflects the total amount</li>
+<li>Delete items</li>
+<li>Persist to local storage</li>
+</ul>
+<p>This tutorial assumes that you have at least some experience with React and Hooks in advance.</p>
+<p><strong><em>You can find the code in this Github <a href="https://github.com/japiirainen/recoilJS-expense-tracker">Repo</a></em></strong>.</p>
+<h2 id="so-lets-start-writing-it">So let’s start writing it!</h2>
+<p>first, we jump into the root directory and wrap the <strong><em>App.js</em></strong> component with <strong><em>RecoilRoot</em></strong>. In this application the <strong><em>App.js</em></strong> component will contain all other components.</p>
+<p><em><strong>index.js</strong></em></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> ReactDOM <span class="im">from</span> <span class="st">'react-dom'</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> App <span class="im">from</span> <span class="st">'./App'</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {RecoilRoot} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>ReactDOM<span class="op">.</span><span class="fu">render</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;React.StrictMode&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;RecoilRoot&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">&lt;App</span> <span class="fu">/&gt;</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;/RecoilRoot&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;/React.StrictMode&gt;</span><span class="op">,</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">'root'</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<p><strong><em>RecoilRoot</em></strong> is the actual component that will provide our state across our whole application. You can think of it similarly to let’s say a context provider while using React’s <strong><em>useContext</em></strong> hook or a store provider when using <strong><em>redux</em></strong>.</p>
+<h2 id="atoms">Atoms</h2>
+<p><em><strong>atoms.js</strong></em></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {atom} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> transactionListState <span class="op">=</span> <span class="fu">atom</span>({</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">'transactionListState'</span><span class="op">,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">default</span><span class="op">:</span> [</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">id</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">amount</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> <span class="st">'Found a 10 dollar bill!'</span><span class="op">,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">id</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">amount</span><span class="op">:</span> <span class="op">-</span><span class="dv">110</span><span class="op">,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> <span class="st">'New keyboard'</span><span class="op">,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>      <span class="dt">id</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">amount</span><span class="op">:</span> <span class="dv">300</span><span class="op">,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> <span class="st">'Sold my old Playstation!'</span><span class="op">,</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  ]<span class="op">,</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>In recoilJS, atoms are units of state. They are updateable and subscribable, which means that when an atom is updated, each subscribed component is re-rendered with the new value. We need to give each atom a unique key and set some default value, just like with the <strong><em>useState</em></strong> hook. My atom will eventually have an empty array([]) as its default value. I just gave some initial data, so it’s easier to understand what’s going on :-). If this is not making any sense right now, I promise it will soon!</p>
+<p>Lets jump into the <strong><em>Transaction.js</em></strong> component that will contain a single transaction and later we will display many of these in the <strong><em>TransactionList.js</em></strong> component.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> Transaction <span class="op">=</span> ({transaction}) <span class="kw">=&gt;</span> {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;li</span> <span class="ot">className</span><span class="op">=</span><span class="va">{</span>transaction<span class="op">.</span><span class="at">amount</span><span class="va">}</span><span class="kw">&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="va">{</span>transaction<span class="op">.</span><span class="at">text</span><span class="va">}</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;span&gt;</span><span class="va">{</span>transaction<span class="op">.</span><span class="at">amount</span><span class="va">}</span><span class="kw">&lt;/span&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;button</span> <span class="ot">className</span><span class="op">=</span><span class="st">'delete-btn'</span><span class="kw">&gt;</span>x<span class="kw">&lt;/button&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/li&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Right now we don’t have much there just a template ready to take in some data. Next, we will display the data I already have inside my <strong><em>atom</em></strong> from <strong><em>TransactionList.js</em></strong>!</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {Transaction} <span class="im">from</span> <span class="st">'./Transaction'</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {transactionListState} <span class="im">from</span> <span class="st">'../recoil/atoms'</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useRecoilValue} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> TransactionList <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> transactionList <span class="op">=</span> <span class="fu">useRecoilValue</span>(transactionListState)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h3&gt;</span>Transaction History<span class="kw">&lt;/h3&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;ul</span> <span class="ot">className</span><span class="op">=</span><span class="st">'list'</span><span class="kw">&gt;</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">{</span>transactionList<span class="op">.</span><span class="fu">map</span>((transaction) <span class="kw">=&gt;</span> (</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>          <span class="fu">&lt;Transaction</span> <span class="ot">key</span><span class="op">=</span><span class="va">{</span>transaction<span class="op">.</span><span class="at">id</span><span class="va">}</span> <span class="ot">transaction</span><span class="op">=</span><span class="va">{</span>transaction<span class="va">}</span> <span class="fu">/&gt;</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        ))<span class="va">}</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/&gt;</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>So if you are familiar with react this will probably look quite similar to what you have previously seen. Here we use <strong><em>useRecoilValue</em></strong> instead of <strong><em>useRecoilState</em></strong> because we only read the current state of our <strong><em>transactionListState</em></strong> atom. Then we just map our array of transactions into the <strong><em>Transaction.js</em></strong> component and send the data down with props. Let’s take a look at the <strong><em>NewTransaction.js</em></strong> component.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React<span class="op">,</span> {useState} <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {transactionListState} <span class="im">from</span> <span class="st">'../recoil/atoms'</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useSetRecoilState} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {v4 <span class="im">as</span> uuidv4} <span class="im">from</span> <span class="st">'uuid'</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> NewTransaction <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [textValue<span class="op">,</span> setTextValue] <span class="op">=</span> <span class="fu">useState</span>(<span class="st">''</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [amount<span class="op">,</span> setAmount] <span class="op">=</span> <span class="fu">useState</span>(<span class="dv">0</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> setTransactionList <span class="op">=</span> <span class="fu">useSetRecoilState</span>(transactionListState)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> NewTransaction <span class="op">=</span> (e) <span class="kw">=&gt;</span> {</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    e<span class="op">.</span><span class="fu">preventDefault</span>()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setTransactionList</span>((oldTransactionList) <span class="kw">=&gt;</span> [</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="op">...</span>oldTransactionList<span class="op">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>      {</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">id</span><span class="op">:</span> <span class="fu">uuidv4</span>()<span class="op">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">amount</span><span class="op">:</span> <span class="op">+</span>amount<span class="op">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="dt">text</span><span class="op">:</span> textValue<span class="op">,</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    ])</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setTextValue</span>(<span class="st">''</span>)</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setAmount</span>(<span class="dv">0</span>)</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> handleTextValue <span class="op">=</span> (e) <span class="kw">=&gt;</span> {</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setTextValue</span>(e<span class="op">.</span><span class="at">target</span><span class="op">.</span><span class="at">value</span>)</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> handleAmount <span class="op">=</span> (e) <span class="kw">=&gt;</span> {</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setAmount</span>(e<span class="op">.</span><span class="at">target</span><span class="op">.</span><span class="at">value</span>)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;&gt;</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h3&gt;</span>Add new transaction<span class="kw">&lt;/h3&gt;</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;form&gt;</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div&gt;</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;label</span> <span class="ot">htmlFor</span><span class="op">=</span><span class="st">'text'</span><span class="kw">&gt;</span>Description<span class="kw">&lt;/label&gt;</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;input</span> <span class="ot">value</span><span class="op">=</span><span class="va">{</span>textValue<span class="va">}</span> <span class="ot">onChange</span><span class="op">=</span><span class="va">{</span>handleTextValue<span class="va">}</span> <span class="kw">/&gt;</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;div&gt;</span></span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;label</span> <span class="ot">htmlFor</span><span class="op">=</span><span class="st">'amount'</span><span class="kw">&gt;</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>            Amount <span class="kw">&lt;br</span> <span class="kw">/&gt;</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;/label&gt;</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>          <span class="kw">&lt;input</span> <span class="ot">value</span><span class="op">=</span><span class="va">{</span>amount<span class="va">}</span> <span class="ot">onChange</span><span class="op">=</span><span class="va">{</span>handleAmount<span class="va">}</span> <span class="kw">/&gt;</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;button</span> <span class="ot">onClick</span><span class="op">=</span><span class="va">{</span>NewTransaction<span class="va">}</span><span class="kw">&gt;</span>Add transaction<span class="kw">&lt;/button&gt;</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/form&gt;</span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/&gt;</span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>So here we need to be able to add a new transaction to our atom that contains the current state of our transactions list. Therefore we use <strong><em>useSetRecoilState</em></strong> which allows us to do just that! Our <strong><em>NewTransaction</em></strong> function sets the state to contain all the transactions that were already there and adds a new item into the list.</p>
+<p>And if you were wondering what’s going on with <strong><em>id: uuidv4()</em></strong>, it’s just a library that generates some random id’s for us!</p>
+<h2 id="selectors">Selectors</h2>
+<p>The second core concept of Recoil is <strong><em>Selectors</em></strong>. As they state in the docs, a selector represents a piece of derived state. You can think of derived state as the output of passing state to a pure function that modifies the given state in some way. So we need to be able to calculate the total balance based on the current state of our transactionList. This is a perfect place to use a selector! We will declare a new selector in <strong><em>Selectors.js</em></strong>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {transactionListState} <span class="im">from</span> <span class="st">'./atoms'</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {selector} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> balanceState <span class="op">=</span> <span class="fu">selector</span>({</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">'balanceState'</span><span class="op">,</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">get</span><span class="op">:</span> ({get}) <span class="kw">=&gt;</span> {</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> transactionList <span class="op">=</span> <span class="fu">get</span>(transactionListState)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> amounts <span class="op">=</span> transactionList<span class="op">.</span><span class="fu">map</span>((transaction) <span class="kw">=&gt;</span> transaction<span class="op">.</span><span class="at">amount</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> balance <span class="op">=</span> amounts<span class="op">.</span><span class="fu">reduce</span>((acc<span class="op">,</span> num) <span class="kw">=&gt;</span> (acc <span class="op">+=</span> num)<span class="op">,</span> <span class="dv">0</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> balance</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>Selectors also take in a unique key, but they don’t have a default value, but instead, they have <strong><em>get</em></strong>and <strong><em>set</em></strong> properties. We will only need the get property so we’ll focus on that. With the get property, we can get the value of some atom and do stuff with it. In our case, we use our <strong><em>transactionListState</em></strong> atom, and we want to add together all the amount properties of the transactions. After the calculation, we just return the result, and we can use it in our <strong><em>Balance.js</em></strong> component!</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useRecoilValue} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {balanceState} <span class="im">from</span> <span class="st">'../recoil/selectors'</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> Balance <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> balance <span class="op">=</span> <span class="fu">useRecoilValue</span>(balanceState)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h4&gt;</span>Your Balance<span class="kw">&lt;/h4&gt;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h1&gt;</span><span class="va">{</span>balance<span class="va">}</span><span class="kw">&lt;/h1&gt;</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Quite simple right? 😺</p>
+<p>Now let’s make one more selector that will allow us to display the total amounts of incomes and expenses.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> expenseStatsState <span class="op">=</span> <span class="fu">selector</span>({</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">key</span><span class="op">:</span> <span class="st">'expenseStatsState'</span><span class="op">,</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">get</span><span class="op">:</span> ({get}) <span class="kw">=&gt;</span> {</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> transactionList <span class="op">=</span> <span class="fu">get</span>(transactionListState)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> amounts <span class="op">=</span> transactionList<span class="op">.</span><span class="fu">map</span>((transaction) <span class="kw">=&gt;</span> transaction<span class="op">.</span><span class="at">amount</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> income <span class="op">=</span> amounts</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">filter</span>((num) <span class="kw">=&gt;</span> num <span class="op">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">reduce</span>((acc<span class="op">,</span> num) <span class="kw">=&gt;</span> (acc <span class="op">+=</span> num)<span class="op">,</span> <span class="dv">0</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> expense <span class="op">=</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      amounts<span class="op">.</span><span class="fu">filter</span>((num) <span class="kw">=&gt;</span> num <span class="op">&lt;</span> <span class="dv">0</span>)<span class="op">.</span><span class="fu">reduce</span>((acc<span class="op">,</span> num) <span class="kw">=&gt;</span> (acc <span class="op">+=</span> num)<span class="op">,</span> <span class="dv">0</span>) <span class="op">*</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">-</span>(<span class="dv">1</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      income<span class="op">,</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>      expense<span class="op">,</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+<p>Lets use it in <strong><em>ExpenseStatus.js</em></strong>. We access the value a bit differently now since we returned an object that contains two values, so we use deconstructing.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useRecoilValue} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {expenseStatsState} <span class="im">from</span> <span class="st">'../recoil/selectors'</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> ExpenseStatus <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> {income<span class="op">,</span> expense} <span class="op">=</span> <span class="fu">useRecoilValue</span>(expenseStatsState)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">'expense-status-container'</span><span class="kw">&gt;</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;h4&gt;</span> Income <span class="kw">&lt;/h4&gt;</span> <span class="kw">&lt;p</span> <span class="ot">className</span><span class="op">=</span><span class="st">'money plus'</span><span class="kw">&gt;</span><span class="va">{</span>income<span class="va">}</span><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;div&gt;</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>        <span class="kw">&lt;h4&gt;</span> Expense <span class="kw">&lt;/h4&gt;</span> <span class="kw">&lt;p</span> <span class="ot">className</span><span class="op">=</span><span class="st">'money minus'</span><span class="kw">&gt;</span>-<span class="va">{</span>expense<span class="va">}</span><span class="kw">&lt;/p&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<h2 id="removing-transactions">Removing transactions</h2>
+<p>We are still missing the ability to remove stuff from our list of transactions, so let’s make that possible! We already have a delete button inside of our <strong><em>Transaction.js</em></strong> component so we just need to add some functionality.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useRecoilState} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {transactionListState} <span class="im">from</span> <span class="st">'../recoil/atoms'</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {removeItemAtIndex} <span class="im">from</span> <span class="st">'../utils'</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> Transaction <span class="op">=</span> ({transaction}) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [transactionList<span class="op">,</span> setTransactionList] <span class="op">=</span> <span class="fu">useRecoilState</span>(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    transactionListState</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> index <span class="op">=</span> transactionList<span class="op">.</span><span class="fu">findIndex</span>(</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    (listItem) <span class="kw">=&gt;</span> listItem <span class="op">===</span> transaction</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> removeTransaction <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> newList <span class="op">=</span> <span class="fu">removeItemAtIndex</span>(transactionList<span class="op">,</span> index)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setTransactionList</span>(newList)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> sign <span class="op">=</span> transaction<span class="op">.</span><span class="at">amount</span> <span class="op">&lt;</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">'-'</span> <span class="op">:</span> <span class="st">'+'</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;li</span> <span class="ot">className</span><span class="op">=</span><span class="va">{</span>transaction<span class="op">.</span><span class="at">amount</span> <span class="op">&lt;</span> <span class="dv">0</span> <span class="op">?</span> <span class="st">'minus'</span> <span class="op">:</span> <span class="st">'plus'</span><span class="va">}</span><span class="kw">&gt;</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>      <span class="va">{</span>transaction<span class="op">.</span><span class="at">text</span><span class="va">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;span&gt;</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>        <span class="va">{</span>sign<span class="va">}</span>$<span class="va">{</span><span class="bu">Math</span><span class="op">.</span><span class="fu">abs</span>(transaction<span class="op">.</span><span class="at">amount</span>)<span class="va">}</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/span&gt;</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;button</span> <span class="ot">className</span><span class="op">=</span><span class="st">'delete-btn'</span> <span class="ot">onClick</span><span class="op">=</span><span class="va">{</span>removeTransaction<span class="va">}</span><span class="kw">&gt;</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>        x</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/button&gt;</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/li&gt;</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co">//  helper function for removing a transaction</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> removeItemAtIndex <span class="op">=</span> (arr<span class="op">,</span> index) <span class="kw">=&gt;</span> {</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> [<span class="op">...</span>arr<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> index)<span class="op">,</span> <span class="op">...</span>arr<span class="op">.</span><span class="fu">slice</span>(index <span class="op">+</span> <span class="dv">1</span>)]</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Now we finally use <strong><em>useRecoilState</em></strong>! As you can see it’s just like using the <strong><em>useState</em></strong> hook in vanilla React. The reason I need to do <strong><em>Math.abs()</em></strong> which gives me the absolute value of the number we pass into it is that it makes all the negative numbers positive, so the logic for putting the sign ahead of the number doesn’t get messed up.</p>
+<h2 id="finally">Finally!</h2>
+<p>Let’s implement local storage, so all our transactions don’t disappear if we reload our page! We just need to update two of our components to get this working.</p>
+<p>Firstly @ <strong><em>NewTransaction.js</em></strong> we just add this code snippet after our <strong><em>NewTransaction</em></strong> function to set all transactions that we create to localStorage. We also need to change from using <strong><em>useSetRecoilState</em></strong> to <strong><em>useRecoilState</em></strong> since we need to pass our transactionList to localStorage.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">useEffect</span>(() <span class="kw">=&gt;</span> {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  localStorage<span class="op">.</span><span class="fu">setItem</span>(<span class="st">'TRANSACTION_LIST'</span><span class="op">,</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>(transactionList))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>}<span class="op">,</span> [transactionList])</span></code></pre></div>
+<p>And <span class="citation" data-cites="*">@*</span>*<em>TransactionList.js</em><strong> we switch from using </strong>_useRecoilValue_<strong> to</strong>_useRecoilState_** since if we find some transactions in local localStorage we need to set the list state to match that.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> React<span class="op">,</span> {useEffect} <span class="im">from</span> <span class="st">'react'</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {Transaction} <span class="im">from</span> <span class="st">'./Transaction'</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {transactionListState} <span class="im">from</span> <span class="st">'../recoil/atoms'</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> {useRecoilState} <span class="im">from</span> <span class="st">'recoil'</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="kw">const</span> TransactionList <span class="op">=</span> () <span class="kw">=&gt;</span> {</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> [transactionList<span class="op">,</span> setTransactionList] <span class="op">=</span> <span class="fu">useRecoilState</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    transactionListState</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">useEffect</span>(() <span class="kw">=&gt;</span> {</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setTransactionList</span>(<span class="bu">JSON</span><span class="op">.</span><span class="fu">parse</span>(localStorage<span class="op">.</span><span class="fu">getItem</span>(<span class="st">'TRANSACTION_LIST'</span>)))</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span> [setTransactionList])</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h3&gt;</span>Transaction History<span class="kw">&lt;/h3&gt;</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;ul</span> <span class="ot">className</span><span class="op">=</span><span class="st">'list'</span><span class="kw">&gt;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">{</span>transactionList <span class="op">!==</span> <span class="kw">null</span> <span class="op">&amp;&amp;</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>          transactionList<span class="op">.</span><span class="fu">map</span>((transaction) <span class="kw">=&gt;</span> (</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">&lt;Transaction</span> <span class="ot">key</span><span class="op">=</span><span class="va">{</span>transaction<span class="op">.</span><span class="at">id</span><span class="va">}</span> <span class="ot">transaction</span><span class="op">=</span><span class="va">{</span>transaction<span class="va">}</span> <span class="fu">/&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>          ))<span class="va">}</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/&gt;</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>So that’s it! I hope you found this article useful in some way.</p>
+<p>👋🏼👋🏼</p>
+
+    </main>
+
+    <footer>
+      Site proudly generated by
+      <a href="http://jaspervdj.be/hakyll">Hakyll</a> | Source code is available
+      at
+      <a href="https://github.com/japiirainen/japiirainen.github.io">GitHub</a>
+    </footer>
+  </body>
+</html>
