@@ -5,7 +5,7 @@ date: January 9, 2022
 tags: haskell, parser-combinators, parsec, microparsec
 ---
 
-One of the many strengts of haskell is the ability to easily embed other small languages (sometimes called EDSL, short for embedded domain specific language) inside it. One famous example of this is the family of libraries known as parser combinators. They aim to solve the task of parsing structured text into well-typed data-structures, and succeed in it quite beautifully. In this short series of blog posts I will show you how to implement a simple and usable parser combinator library. For real world use-cases you should propably just use [***megaparsec***](https://hackage.haskell.org/package/megaparsec).
+One of the many strengts of haskell is the ability to easily embed other small languages (sometimes called EDSL, short for embedded domain specific language) inside it. One famous example of this is the family of libraries known as parser combinators. They aim to solve the task of parsing structured text into well-typed data-structures, and succeed in it quite beautifully. In this short series of blog posts I will show you how to implement a simple and usable parser combinator library. You can find the source code for the library we will develop [here](https://github.com/japiirainen/microparser). For real world use-cases you should propably just use [***megaparsec***](https://hackage.haskell.org/package/megaparsec).
 
 # MicroParser
 
