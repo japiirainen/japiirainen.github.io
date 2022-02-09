@@ -8,8 +8,84 @@
         <name>Joona Piirainen</name>
         <email>joona.piirainen@gmail.com</email>
     </author>
-    <updated>2022-01-09T00:00:00Z</updated>
+    <updated>2022-02-08T00:00:00Z</updated>
     <entry>
+    <title>Implementing parser combinators pt. 2</title>
+    <link href="https://japiirainen.com//posts/blog2.html" />
+    <id>https://japiirainen.com//posts/blog2.html</id>
+    <published>2022-02-08T00:00:00Z</published>
+    <updated>2022-02-08T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+  <em>Posted on February  8, 2022  by Joona </em><br /><br />
+</div>
+
+<p>Welcome to part 2 of the series where we implement a simple <em>parser combinator</em> library from scratch in haskell. In the first episode we defined our <em>Parser</em> type and implemented all the necessary type-classes for it. You can find the source <a href="https://github.com/japiirainen/microparser">here</a>. In addition to this we defined a couple of <em>combinators</em>, which allowed us to defined the following parser.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">pKv ::</span> <span class="dt">Parser</span> <span class="dt">KV</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pKv <span class="ot">=</span> <span class="dt">KV</span> <span class="op">&lt;$&gt;</span> parseKv</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    parseKv <span class="ot">=</span> (,) <span class="op">&lt;$&gt;</span> many alpha <span class="op">&lt;*</span> char <span class="ch">&#39;:&#39;</span> <span class="op">&lt;*</span> spaces <span class="op">&lt;*&gt;</span> many alpha</span></code></pre></div>
+<p>This simple parser parses key-value pairs into an haskell data type. We are also able to <em>run</em> our parser.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>runParser pKv <span class="st">&quot;key: value&quot;</span> <span class="co">-- Right (KV (&quot;key&quot;,&quot;value&quot;))</span></span></code></pre></div>
+<p>This is already quite useful, but lets implement more <em>combinators</em> to make our little library feel a bit more polished. It would be nice if we could easily extend our previously defined <em>pKv</em> parser to parse lists of key value pairs. This will be trivial if we define a combinator called <em>sepBy</em>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ot">sepBy1 ::</span> <span class="dt">Parser</span> a <span class="ot">-&gt;</span> <span class="dt">Parser</span> b <span class="ot">-&gt;</span> <span class="dt">Parser</span> [a]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>sepBy1 p sep <span class="ot">=</span> (<span class="op">:</span>) <span class="op">&lt;$&gt;</span> p <span class="op">&lt;*&gt;</span> many (sep <span class="op">*&gt;</span> p)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="ot">sepBy ::</span> <span class="dt">Parser</span> a <span class="ot">-&gt;</span> <span class="dt">Parser</span> b <span class="ot">-&gt;</span> <span class="dt">Parser</span> [a]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>sepBy parser separator <span class="ot">=</span> sepBy1 parser separator <span class="op">&lt;|&gt;</span> <span class="fu">pure</span> []</span></code></pre></div>
+<p>Note that we defined <em>sepBy</em> by using a stricter version of itself. <em>sepBy1</em> will fail if there is only one <em>kv</em> to parse, while <em>sepBy</em> parses it happily.</p>
+<p>Now defining a parser that parses a list of <em>kv’s</em> is trivial.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">pKvs ::</span> <span class="dt">Parser</span> [<span class="dt">KV</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pKvs <span class="ot">=</span> pKv <span class="ot">`sepBy`</span> char <span class="ch">&#39;,&#39;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>runParser pKvs <span class="st">&quot;key: value,foo: bar&quot;</span> <span class="co">-- Right [KV (&quot;key&quot;,&quot;value&quot;),KV (&quot;foo&quot;,&quot;bar&quot;)]</span></span></code></pre></div>
+<p>Nice. Now that I think of it, wouldn’t it be nice to be able to parse numbers? I think so!</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Maybe</span> (fromMaybe)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Applicative</span> (<span class="dt">Alternative</span>(..), optional) </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Functor</span> (($&gt;))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ot">digit ::</span> <span class="dt">Parser</span> <span class="dt">Char</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>digit <span class="ot">=</span> satisfy <span class="st">&quot;digit&quot;</span> <span class="dt">Char</span><span class="op">.</span><span class="fu">isDigit</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ot">decimal ::</span> (<span class="dt">Integral</span> a, <span class="dt">Read</span> a) <span class="ot">=&gt;</span> <span class="dt">Parser</span> a</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>decimal <span class="ot">=</span> <span class="fu">read</span> <span class="op">&lt;$&gt;</span> many1 digit</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="ot">signedDecimal ::</span> <span class="dt">Parser</span> <span class="dt">Int</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>signedDecimal <span class="ot">=</span> fromMaybe <span class="fu">id</span> <span class="op">&lt;$&gt;</span> optional (char <span class="ch">&#39;-&#39;</span> <span class="op">$&gt;</span> <span class="fu">negate</span>) <span class="op">&lt;*&gt;</span> decimal</span></code></pre></div>
+<p>Now we can parse numbers, Hooray! Here’s a couple of examples.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>runParser (decimal <span class="op">@</span><span class="dt">Int</span>) <span class="st">&quot;123&quot;</span> <span class="co">-- Right (123)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>runParser (decimal <span class="op">@</span><span class="dt">Int</span>) <span class="st">&quot;-123&quot;</span> <span class="co">-- Left &quot;Expecting digit at position 0&quot;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>runParser signedDecimal <span class="st">&quot;-123&quot;</span> <span class="co">-- Right (-123)</span></span></code></pre></div>
+<p>Parsing whitespace is also a common task, especially when you are writing a <em>lexer</em>. Let’s define some useful combinators to make <em>lexing</em> more convenient.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ot">spaces ::</span> <span class="dt">Parser</span> ()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>spaces <span class="ot">=</span> void <span class="op">$</span> many (satisfy <span class="st">&quot;whitespace&quot;</span> <span class="dt">Char</span><span class="op">.</span><span class="fu">isSpace</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ot">newline ::</span> <span class="dt">Parser</span> ()</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>newline <span class="ot">=</span> char <span class="ch">&#39;\n&#39;</span> <span class="op">&lt;|&gt;</span> (char <span class="ch">&#39;\r&#39;</span> <span class="op">*&gt;</span> char <span class="ch">&#39;\n&#39;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="ot">horizontalSpaces ::</span> <span class="dt">Parser</span> ()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>horizontalSpaces <span class="ot">=</span> void <span class="op">.</span> many <span class="op">$</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  satisfy <span class="st">&quot;horizontal whitespace&quot;</span> <span class="op">$</span> \c <span class="ot">-&gt;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Char</span><span class="op">.</span><span class="fu">isSpace</span> c <span class="op">&amp;&amp;</span> c <span class="op">/=</span> <span class="ch">&#39;\n&#39;</span> <span class="op">&amp;&amp;</span> c <span class="op">/=</span> <span class="ch">&#39;\r&#39;</span></span></code></pre></div>
+<p>When we previously parsed key value pairs, they were separated by commas. You might also want to parse key value pairs separated by newlines.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode txt"><code class="sourceCode default"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>key: value</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>foo: bar</span></code></pre></div>
+<p>Let’s write a parser for this.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ot">pKvsNewLine ::</span> <span class="dt">Parser</span> [<span class="dt">KV</span>]</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>pKvsNewLine <span class="ot">=</span> pKv <span class="ot">`sepBy`</span> newline</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>runParser pKvsNewLine <span class="st">&quot;key: value\nfoo: bar&quot;</span> <span class="co">-- Right [KV (&quot;key&quot;,&quot;value&quot;),KV (&quot;foo&quot;,&quot;bar&quot;)]</span></span></code></pre></div>
+<p>Or we could want to parse <em>kv’s</em> which are separated by commas but have some random spaces in between them. Eg. “key: value , foo: bar”. We can use <em>horizontalSpaces</em> for this!</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ot">pKvsHorizontal ::</span> <span class="dt">Parser</span> [<span class="dt">KV</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>pKvsHorizontal <span class="ot">=</span> pKv <span class="ot">`sepBy`</span> s</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span> s <span class="ot">=</span> horizontalSpaces <span class="op">*&gt;</span> char <span class="ch">&#39;,&#39;</span> <span class="op">&lt;*</span> horizontalSpaces</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>runParser pKvsHorizontal <span class="st">&quot;key: value       ,        foo: bar&quot;</span> <span class="co">-- Right [KV (&quot;key&quot;,&quot;value&quot;),KV (&quot;foo&quot;,&quot;bar&quot;)]</span></span></code></pre></div>
+<p>At this point we have quite a powerful set of tools in our hands. We still haven’t seen any interesting use-cases for this machinery. In the next part we will define a parser for a simple programming language.</p>
+<p>Thank you for reading, hope you enjoyed. Have a nice day! - Joona</p>
+<p><a href="https://japiirainen.com/posts/parser-combinators-1.html">Part 1</a></p>
+]]></summary>
+</entry>
+<entry>
     <title>Implementing parser combinators pt. 1</title>
     <link href="https://japiirainen.com//posts/parser-combinators-1.html" />
     <id>https://japiirainen.com//posts/parser-combinators-1.html</id>
