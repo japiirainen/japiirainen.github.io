@@ -46,6 +46,6 @@ This was a pain. I tried using vscode with [***calva***](https://calva.io/), but
 I'm a believer of strong static types, and using clojure made me have even stronger opinions on the matter. Dynamic typing combined with the error messages was honestly terrible at times. This is probably the biggest reason I will likely not return to writing in clojure (at least if I don't have to).
 
 ## Summary
-Overall Clojure was an OK language despite the gripes I have with it. Initially I was steered to trying it since it seems to be kind of popular here in Finland and I wanted to see if I would like to write it professionally at some point (I don't.. At least for now). I honestly have no idea if the code I wrote was idiomatic Clojure code or not (probably not). I will link the repo below and please tell me if it was the way I was using the language that made me not enjoy it more than I did.
+Overall Clojure was an OK language despite the gripes I have with it. Initially I was steered to trying it since it seems to be kind of popular here in Finland and I wanted to see if I would like to write it professionally at some point. I honestly have no idea if the code I wrote was idiomatic Clojure code or not (probably not). I will link the repo below and please tell me if it was the way I was using the language that made me not enjoy it more than I did.
 
 [***Code on Github***](https://github.com/japiirainen/aoc-2015)
