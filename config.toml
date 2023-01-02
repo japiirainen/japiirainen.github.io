@@ -25,7 +25,7 @@ defaultMarkdownHandler = "goldmark"
 [markup.goldmark.renderer]
 unsafe = true # enable html in markdown
 [markup.highlight]
-style = "emacs" # syntax highlight style, see https://xyproto.github.io/splash/docs/
+style = "github" # syntax highlight style, see https://xyproto.github.io/splash/docs/
 
 # https://gohugo.io/content-management/menus/
 [[menu.main]]
@@ -60,7 +60,7 @@ favicon = "favicon.ico" # path to website icon, relative to ./static
 footnote = """
 Follow me on <a class=link href=https://github.com/japiirainen>GitHub</a> or
 <a class=link href=/index.xml>RSS</a> |
-<a class=link href=https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh target=_blank rel=noopener>CC BY-NC-SA 4.0</a>
+<a class=link href=https://mit-license.org/ target=_blank rel=noopener>MIT</a>
 """ # notes in the website footer
 keywords = ["cs", "math", "blog"] # website keywords
 
