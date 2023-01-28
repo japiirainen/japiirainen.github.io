@@ -15,7 +15,7 @@ import Text.Pandoc
     readerExtensions,
     writerExtensions,
   )
-import Text.Pandoc.Highlighting (Style, breezeDark, styleToCss)
+import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
 
 --------------------------------------------------------------------------------
 -- CONFIG
@@ -196,7 +196,7 @@ pandocWriterOpts =
 
 pandocHighlightStyle :: Style
 pandocHighlightStyle =
-  breezeDark -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
+  haddock -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
 
 -- FEEDS
 
