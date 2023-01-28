@@ -13,7 +13,7 @@ This is the start of my new blog.
 
 See you when I actually publish some content!
 
-```hs
+```haskell
 id :: forall a. a -> a
 id = \x -> x
 ```

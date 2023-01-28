@@ -3,11 +3,12 @@
 import Control.Monad (forM_)
 import Data.Maybe (fromMaybe)
 import Data.String
+import Data.List (isSuffixOf)
 import Hakyll
 import System.Directory
 import System.Exit
-import System.FilePath
 import System.FilePattern ((?==))
+import System.FilePath
 import System.Process
 import Text.Pandoc
 import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
@@ -36,6 +37,7 @@ config =
     , providerDirectory = "src"
     , storeDirectory = "ssg/_cache"
     , tmpDirectory = "ssg/_tmp"
+    , watchIgnore = ("_agda/**" ?==)
     }
 
 --------------------------------------------------------------------------------
@@ -62,14 +64,32 @@ main = do
       route idRoute
       compile compressCssCompiler
 
+    match (agdaPattern "*.css") $ do
+      route agdaRoute
+      compile compressCssCompiler
+
+    match (agdaPattern "*.html") $ do
+      route agdaRoute
+      compile copyFileCompiler
+
     match "agda-posts/*.lagda.md" $
       compile $ do
         ident <- getUnderlying
-          unsafeCompiler $
-            processAgdaPost $
-              takeFileName $
-                toFilePath ident
-          makeItem (mempty :: String)
+        unsafeCompiler $
+          processAgdaPost $
+            takeFileName $
+              toFilePath ident
+        makeItem (mempty :: String)
+
+    match (agdaPattern "*.md") $ do
+      let ctx = constField "type" "article" <> postCtx
+
+      route $ (metadataRoute titleRoute `composeRoutes` agdaRoute)
+      compile $
+        pandocCompilerCustom
+          >>= loadAndApplyTemplate "templates/post.html" ctx
+          >>= saveSnapshot "content"
+          >>= loadAndApplyTemplate "templates/default.html" ctx
 
     match "posts/*" $ do
       let ctx = constField "type" "article" <> postCtx
@@ -104,7 +124,9 @@ main = do
     create ["sitemap.xml"] $ do
       route idRoute
       compile $ do
-        posts <- recentFirst =<< loadAll "posts/*"
+        plainPosts <- loadAll "posts/*"
+        agdaPosts <- loadAll $ fromString (agdaOutputDir </> "*.md")
+        posts <- recentFirst (plainPosts ++ agdaPosts)
 
         let pages = posts
             sitemapCtx =
@@ -126,7 +148,6 @@ main = do
     create ["css/code.css"] $ do
       route idRoute
       compile (makeStyle pandocHighlightStyle)
-
 
 --------------------------------------------------------------------------------
 -- COMPILER HELPERS
