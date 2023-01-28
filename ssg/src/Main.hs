@@ -112,6 +112,15 @@ main = do
     match "templates/*" $
       compile templateBodyCompiler
 
+    -- match "agda-posts/*.lagda.md" $
+    --   compile $ do
+    --     ident <- getUnderlying
+    --     unsafeCompiler $
+    --       processAgdaPost $
+    --         takeFileName $
+    --           toFilePath ident
+    --     makeItem (mempty :: String)
+
     create ["sitemap.xml"] $ do
       route idRoute
       compile $ do
@@ -140,14 +149,6 @@ main = do
       route idRoute
       compile (makeStyle pandocHighlightStyle)
 
-    match "agda-posts/*.lagda.md" $
-      compile $ do
-        ident <- getUnderlying
-        unsafeCompiler $
-          processAgdaPost $
-            takeFileName $
-              toFilePath ident
-        makeItem (mempty :: String)
 
 --------------------------------------------------------------------------------
 -- COMPILER HELPERS
