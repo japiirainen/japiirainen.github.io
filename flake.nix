@@ -25,7 +25,7 @@
           haskellNix.overlay
           (final: prev: {
             hakyllProject = final.haskell-nix.project' {
-              src = ./ssg;
+              src = .;
               compiler-nix-name = "ghc925";
               shell.buildInputs = [
                 hakyll-site
@@ -46,7 +46,7 @@
 
         flake = pkgs.hakyllProject.flake { };
 
-        hakyll-site = flake.packages."ssg:exe:hakyll-site";
+        hakyll-site = flake.packages."exe:hakyll-site";
 
         website = pkgs.stdenv.mkDerivation {
           name = "website";

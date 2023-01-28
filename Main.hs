@@ -13,7 +13,7 @@ import System.Process
 import Text.Pandoc
 import Text.Pandoc.Walk
 import Text.Pandoc.Builder
-import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
+import Text.Pandoc.Highlighting (Style, styleToCss, monochrome)
 
 import qualified Data.Text as T
 import qualified Data.Text.Slugger as Slugger
@@ -247,7 +247,7 @@ pandocCompilerCustom =
 
 pandocHighlightStyle :: Style
 pandocHighlightStyle =
-  haddock -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
+  monochrome -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
 
 -- FEEDS
 
