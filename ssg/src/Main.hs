@@ -215,10 +215,10 @@ feedCompiler renderer =
 feedConfiguration :: FeedConfiguration
 feedConfiguration =
   FeedConfiguration
-    { feedTitle = "My Site"
-    , feedDescription = "My Site Description"
-    , feedAuthorName = "My Name"
-    , feedAuthorEmail = "me@myemail.com"
+    { feedTitle = "japiirainen"
+    , feedDescription = "My personal website + blog"
+    , feedAuthorName = "Joona Piirainen"
+    , feedAuthorEmail = "joona.piirainen@gmail.com"
     , feedRoot = root
     }
 

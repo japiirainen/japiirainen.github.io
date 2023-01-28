@@ -93,3 +93,5 @@ able to do this.
 1. Follow cachix's instructions to generate a signing keypair
 1. Copy the signing keypair value to a new `CACHIX_SIGNING_KEY` secret on
    https://github.com/settings/secrets
+
+This website is based on [this](https://github.com/rpearce/hakyll-nix-template) template.

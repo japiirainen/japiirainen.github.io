@@ -1,3 +1,1 @@
-;(function(w, d) {
-  console.log('Hello, world!', w, d)
-})(window, document);
+;(function (_w, _d) {})(window, document)
