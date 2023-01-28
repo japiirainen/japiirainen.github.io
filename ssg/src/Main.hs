@@ -72,15 +72,6 @@ main = do
       route agdaRoute
       compile copyFileCompiler
 
-    match "agda-posts/*.lagda.md" $
-      compile $ do
-        ident <- getUnderlying
-        unsafeCompiler $
-          processAgdaPost $
-            takeFileName $
-              toFilePath ident
-        makeItem (mempty :: String)
-
     match (agdaPattern "*.md") $ do
       let ctx = constField "type" "article" <> postCtx
 
@@ -148,6 +139,15 @@ main = do
     create ["css/code.css"] $ do
       route idRoute
       compile (makeStyle pandocHighlightStyle)
+
+    match "agda-posts/*.lagda.md" $
+      compile $ do
+        ident <- getUnderlying
+        unsafeCompiler $
+          processAgdaPost $
+            takeFileName $
+              toFilePath ident
+        makeItem (mempty :: String)
 
 --------------------------------------------------------------------------------
 -- COMPILER HELPERS
@@ -292,8 +292,8 @@ agdaOptions fileName =
 
 processAgdaPosts :: IO ()
 processAgdaPosts = do
-  filez <- listDirectory agdaInputDir
-  let agdaFiles = filter (".lagda.md" `isSuffixOf`) filez
+  files <- listDirectory agdaInputDir
+  let agdaFiles = filter (".lagda.md" `isSuffixOf`) files
   forM_ agdaFiles processAgdaPost
 
 processAgdaPost :: FilePath -> IO ()
