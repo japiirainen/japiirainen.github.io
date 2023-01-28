@@ -10,9 +10,6 @@ import System.FilePath
 import System.FilePattern ((?==))
 import System.Process
 import Text.Pandoc
-import Text.Pandoc.Builder
-import Text.Pandoc.Options
-import Text.Pandoc.Walk
 import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
 
 import qualified Data.Text as T
