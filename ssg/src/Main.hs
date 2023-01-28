@@ -2,6 +2,7 @@
 
 import Control.Monad (forM_)
 import Data.Maybe (fromMaybe)
+import Data.String
 import Hakyll
 import Text.Pandoc
 import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
@@ -239,6 +240,9 @@ fileNameFromTitle =
 titleRoute :: Metadata -> Routes
 titleRoute =
   constRoute . fileNameFromTitle
+
+--------------------------------------------------------------------------------
+-- AGDA
 
 agdaCommand :: String
 agdaCommand = "agda"
