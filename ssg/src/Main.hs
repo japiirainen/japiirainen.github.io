@@ -4,7 +4,15 @@ import Control.Monad (forM_)
 import Data.Maybe (fromMaybe)
 import Data.String
 import Hakyll
+import System.Directory
+import System.Exit
+import System.FilePath
+import System.FilePattern ((?==))
+import System.Process
 import Text.Pandoc
+import Text.Pandoc.Builder
+import Text.Pandoc.Options
+import Text.Pandoc.Walk
 import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
 
 import qualified Data.Text as T
@@ -79,7 +87,9 @@ main = do
     match "index.html" $ do
       route idRoute
       compile $ do
-        posts <- recentFirst =<< loadAll "posts/*"
+        plainPosts <- loadAll "posts/*"
+        agdaPosts <- loadAll $ fromString (agdaOutputDir </> "*.md")
+        posts <- recentFirst (plainPosts ++ agdaPosts)
 
         let indexCtx =
               listField "posts" postCtx (return posts)
