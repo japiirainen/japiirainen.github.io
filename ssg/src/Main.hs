@@ -22,11 +22,11 @@ import Text.Pandoc.Highlighting (Style, breezeDark, styleToCss)
 
 root :: String
 root =
-  "https://my-site.com"
+  "https://japiirainen.xyz"
 
 siteName :: String
 siteName =
-  "My Site Name"
+  "japiirainen"
 
 config :: Configuration
 config =

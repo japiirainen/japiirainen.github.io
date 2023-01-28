@@ -1,5 +1,6 @@
 !src/js/dist
 .DS_Store
+.vscode
 .ghc.environment.*
 _cache
 _tmp

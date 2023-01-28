@@ -16,7 +16,6 @@
 }
 html,
 body {
-  font-family: JuliaMono-Regular;
   min-height: 100vh;
 }
 body {
@@ -34,6 +33,10 @@ button {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+h1,
+h2 {
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+}
 h1 {
   font-size: 4rem;
 }
@@ -44,9 +47,15 @@ small {
   font-size: 1.6rem;
   font-style: italic;
 }
+small,
+p {
+  font-family: Tahoma, Arial, sans-serif;
+}
 p {
   font-size: 1.8rem;
 }
-pre.sourceCode {
+pre.sourceCode,
+code {
+  font-family: JuliaMono-Regular;
   padding: 2rem 1.5rem;
 }
