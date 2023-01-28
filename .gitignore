@@ -4,6 +4,7 @@
 .ghc.environment.*
 _cache
 _tmp
+_agda
 dist
 dist-newstyle
 node_modules

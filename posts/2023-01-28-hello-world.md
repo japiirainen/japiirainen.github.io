@@ -4,7 +4,7 @@ desc: "I announce my blog to the world"
 keywords: "hello, announcement"
 lang: "en"
 title: "Hello, world!"
-updated: "2023-01-23T12:00:00Z"
+date: "2023-01-23T12:00:00Z"
 ---
 
 Hello, world!

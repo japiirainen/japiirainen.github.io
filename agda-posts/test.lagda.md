@@ -3,8 +3,8 @@ author: 'Joona piirainen'
 desc: 'Testing Literate Agda'
 keywords: 'agda, literate'
 lang: 'en'
-title: ', world!'
-updated: '2023-01-23T12:00:00Z'
+title: 'Hello, Agda!'
+date: '2023-01-23T12:00:00Z'
 ---
 
 If you only care about how I did it, you can [click here to skip](#chosen-approach) all the rambling!

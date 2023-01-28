@@ -30,13 +30,13 @@ siteName =
 config :: Configuration
 config =
   defaultConfiguration
-    { destinationDirectory = "dist"
+    { destinationDirectory = "docs"
     , ignoreFile = const False
     , previewHost = "127.0.0.1"
     , previewPort = 8000
-    , providerDirectory = "src"
-    , storeDirectory = "ssg/_cache"
-    , tmpDirectory = "ssg/_tmp"
+    , providerDirectory = "."
+    , storeDirectory = "_cache"
+    , tmpDirectory = "_tmp"
     , watchIgnore = ("_agda/**" ?==)
     }
 
@@ -112,14 +112,14 @@ main = do
     match "templates/*" $
       compile templateBodyCompiler
 
-    -- match "agda-posts/*.lagda.md" $
-    --   compile $ do
-    --     ident <- getUnderlying
-    --     unsafeCompiler $
-    --       processAgdaPost $
-    --         takeFileName $
-    --           toFilePath ident
-    --     makeItem (mempty :: String)
+    match "agda-posts/*.lagda.md" $
+      compile $ do
+        ident <- getUnderlying
+        unsafeCompiler $
+          processAgdaPost $
+            takeFileName $
+              toFilePath ident
+        makeItem (mempty :: String)
 
     create ["sitemap.xml"] $ do
       route idRoute
@@ -315,4 +315,4 @@ agdaPattern :: IsString a => FilePath -> a
 agdaPattern ending = fromString $ agdaOutputDir </> ending
 
 agdaRoute :: Routes
-agdaRoute = gsubRoute (agdaOutputDir </> "") (const "posts")
+agdaRoute = gsubRoute (agdaOutputDir </> "") (const ".")

@@ -8,7 +8,7 @@ license-file:        LICENSE
 
 executable hakyll-site
   main-is:           Main.hs
-  hs-source-dirs:    src
+  hs-source-dirs:    .
   build-depends:     base >= 4.8
                    , hakyll >= 4.14
                    , pandoc >= 2.11
