@@ -56,7 +56,8 @@ p {
   font-size: 1.8rem;
 }
 pre.sourceCode,
+pre.Agda,
 code {
   font-family: JuliaMono-Regular;
-  padding: 2rem 1.5rem;
+  overflow-y: scroll;
 }

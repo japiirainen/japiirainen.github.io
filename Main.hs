@@ -11,6 +11,8 @@ import System.FilePattern ((?==))
 import System.FilePath
 import System.Process
 import Text.Pandoc
+import Text.Pandoc.Walk
+import Text.Pandoc.Builder
 import Text.Pandoc.Highlighting (Style, haddock, styleToCss)
 
 import qualified Data.Text as T
@@ -201,31 +203,47 @@ updatedTitle =
 
 pandocCompilerCustom :: Compiler (Item String)
 pandocCompilerCustom =
-  pandocCompilerWith pandocReaderOpts pandocWriterOpts
+  let mathExtensions =
+        extensionsFromList
+          [ Ext_tex_math_dollars
+          , Ext_tex_math_double_backslash
+          , Ext_latex_macros
+          , Ext_fenced_code_attributes
+          , Ext_gfm_auto_identifiers
+          , Ext_implicit_header_references
+          , Ext_smart
+          , Ext_footnotes
+          ]
+      writerOptions =
+        defaultHakyllWriterOptions
+          { writerExtensions =
+              writerExtensions
+                defaultHakyllWriterOptions
+                <> mathExtensions
+          , writerHTMLMathMethod = MathJax ""
+          , writerHighlightStyle = Just pandocHighlightStyle
+          }
+   in pandocCompilerWithTransform
+        defaultHakyllReaderOptions
+        writerOptions
+        $ walk prependAnchor
+  where
+    prependAnchor :: Block -> Block
+    prependAnchor (Header lvl attr@(id', _, _) txts) =
+      Header
+        lvl
+        attr
+        ( toList
+            ( linkWith
+                (mempty, ["anchor fas fa-xs fa-link"], mempty)
+                ("#" <> id')
+                mempty
+                mempty
+            )
+            <> txts
+        )
+    prependAnchor x = x
 
-pandocExtensionsCustom :: Extensions
-pandocExtensionsCustom =
-  githubMarkdownExtensions
-    <> extensionsFromList
-      [ Ext_fenced_code_attributes
-      , Ext_gfm_auto_identifiers
-      , Ext_implicit_header_references
-      , Ext_smart
-      , Ext_footnotes
-      ]
-
-pandocReaderOpts :: ReaderOptions
-pandocReaderOpts =
-  defaultHakyllReaderOptions
-    { readerExtensions = pandocExtensionsCustom
-    }
-
-pandocWriterOpts :: WriterOptions
-pandocWriterOpts =
-  defaultHakyllWriterOptions
-    { writerExtensions = pandocExtensionsCustom
-    , writerHighlightStyle = Just pandocHighlightStyle
-    }
 
 pandocHighlightStyle :: Style
 pandocHighlightStyle =
