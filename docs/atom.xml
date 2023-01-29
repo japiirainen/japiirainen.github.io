@@ -8,8 +8,37 @@
         <name>Joona Piirainen</name>
         <email>joona.piirainen@gmail.com</email>
     </author>
-    <updated>2023-01-23T12:00:00Z</updated>
+    <updated>2023-01-29T12:00:00Z</updated>
     <entry>
+    <title>A small, weird and unpractical programming language. </title>
+    <link href="https://japiirainen.xyz/posts/fp.html" />
+    <id>https://japiirainen.xyz/posts/fp.html</id>
+    <published>2023-01-29T12:00:00Z</published>
+    <updated>2023-01-29T12:00:00Z</updated>
+    <summary type="html"><![CDATA[<main>
+  <article>
+    <header>
+      <h1>
+        <a href="./posts/fp.html">A small, weird and unpractical programming language. </a>
+      </h1>
+      <div>
+        <small>2023-01-29</small>
+        
+      </div>
+    </header>
+    <section><p>tODO</p></section>
+  </article>
+</main>
+
+<hr />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+]]></summary>
+</entry>
+<entry>
     <title>Hello, world!</title>
     <link href="https://japiirainen.xyz/posts/hello-world.html" />
     <id>https://japiirainen.xyz/posts/hello-world.html</id>

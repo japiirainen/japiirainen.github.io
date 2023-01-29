@@ -7,8 +7,37 @@
         <description><![CDATA[My personal website + blog]]></description>
         <atom:link href="https://japiirainen.xyz/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Mon, 23 Jan 2023 12:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sun, 29 Jan 2023 12:00:00 UT</lastBuildDate>
         <item>
+    <title>A small, weird and unpractical programming language. </title>
+    <link>https://japiirainen.xyz/posts/fp.html</link>
+    <description><![CDATA[<main>
+  <article>
+    <header>
+      <h1>
+        <a href="./posts/fp.html">A small, weird and unpractical programming language. </a>
+      </h1>
+      <div>
+        <small>2023-01-29</small>
+        
+      </div>
+    </header>
+    <section><p>tODO</p></section>
+  </article>
+</main>
+
+<hr />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+]]></description>
+    <pubDate>Sun, 29 Jan 2023 12:00:00 UT</pubDate>
+    <guid>https://japiirainen.xyz/posts/fp.html</guid>
+    <dc:creator>Joona Piirainen</dc:creator>
+</item>
+<item>
     <title>Hello, world!</title>
     <link>https://japiirainen.xyz/posts/hello-world.html</link>
     <description><![CDATA[<main>
