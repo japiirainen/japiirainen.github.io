@@ -1,6 +1,16 @@
 my website
 
-[Hakyll](https://jaspervdj.be/hakyll/) + [Nix](https://nixos.org) template
+## useful commands
+
+```sh
+just
+
+just build
+
+just rebuild
+
+just watch
+```
 
 ## Features
 

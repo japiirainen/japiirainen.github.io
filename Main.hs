@@ -13,21 +13,16 @@ import System.Process
 import Text.Pandoc
 import Text.Pandoc.Walk
 import Text.Pandoc.Builder
-import Text.Pandoc.Highlighting (Style, styleToCss, monochrome)
-
-import qualified Data.Text as T
-import qualified Data.Text.Slugger as Slugger
+import Text.Pandoc.Highlighting
 
 --------------------------------------------------------------------------------
 -- CONFIG
 
 root :: String
-root =
-  "https://japiirainen.xyz"
+root = "https://japiirainen.xyz"
 
 siteName :: String
-siteName =
-  "japiirainen"
+siteName = "japiirainen"
 
 config :: Configuration
 config =
@@ -77,7 +72,7 @@ main = do
     match (agdaPattern "*.md") $ do
       let ctx = constField "type" "article" <> postCtx
 
-      route $ (metadataRoute titleRoute `composeRoutes` agdaRoute)
+      route $ titleRoute `composeRoutes` agdaRoute
       compile $
         pandocCompilerCustom
           >>= loadAndApplyTemplate "templates/post.html" ctx
@@ -87,7 +82,7 @@ main = do
     match "posts/*" $ do
       let ctx = constField "type" "article" <> postCtx
 
-      route $ metadataRoute titleRoute
+      route titleRoute
       compile $
         pandocCompilerCustom
           >>= loadAndApplyTemplate "templates/post.html" ctx
@@ -247,7 +242,7 @@ pandocCompilerCustom =
 
 pandocHighlightStyle :: Style
 pandocHighlightStyle =
-  monochrome -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
+  tango -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
 
 -- FEEDS
 
@@ -273,20 +268,9 @@ feedConfiguration =
     , feedRoot = root
     }
 
---------------------------------------------------------------------------------
--- CUSTOM ROUTE
 
-getTitleFromMeta :: Metadata -> String
-getTitleFromMeta =
-  fromMaybe "no title" . lookupString "title"
-
-fileNameFromTitle :: Metadata -> FilePath
-fileNameFromTitle =
-  T.unpack . (`T.append` ".html") . Slugger.toSlug . T.pack . getTitleFromMeta
-
-titleRoute :: Metadata -> Routes
-titleRoute =
-  constRoute . fileNameFromTitle
+titleRoute :: Routes
+titleRoute = idRoute `composeRoutes` setExtension "html"
 
 --------------------------------------------------------------------------------
 -- AGDA
@@ -333,4 +317,4 @@ agdaPattern :: IsString a => FilePath -> a
 agdaPattern ending = fromString $ agdaOutputDir </> ending
 
 agdaRoute :: Routes
-agdaRoute = gsubRoute (agdaOutputDir </> "") (const ".")
+agdaRoute = gsubRoute (agdaOutputDir </> "") (const "posts")
