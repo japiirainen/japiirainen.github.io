@@ -8,25 +8,46 @@
         <name>Joona Piirainen</name>
         <email>joona.piirainen@gmail.com</email>
     </author>
-    <updated>2023-01-29T12:00:00Z</updated>
+    <updated>2023-01-30T12:00:00Z</updated>
     <entry>
-    <title>A small, weird and unpractical programming language. </title>
-    <link href="https://japiirainen.xyz/posts/fp.html" />
-    <id>https://japiirainen.xyz/posts/fp.html</id>
-    <published>2023-01-29T12:00:00Z</published>
-    <updated>2023-01-29T12:00:00Z</updated>
+    <title>Papers everyone should read #0</title>
+    <link href="https://japiirainen.xyz/posts/papers-0.html" />
+    <id>https://japiirainen.xyz/posts/papers-0.html</id>
+    <published>2023-01-30T12:00:00Z</published>
+    <updated>2023-01-30T12:00:00Z</updated>
     <summary type="html"><![CDATA[<main>
   <article>
     <header>
       <h1>
-        <a href="./posts/fp.html">A small, weird and unpractical programming language. </a>
+        <a href="./posts/papers-0.html">Papers everyone should read #0</a>
       </h1>
       <div>
-        <small>2023-01-29</small>
+        <small>2023-01-30</small>
         
       </div>
     </header>
-    <section><p>tODO</p></section>
+    <section><p>This is the first episode of a (hopefully) long and fruitful journey through some of the most influential papers in the field of computer science. At least thats the intent, it might turn into a list of papers I have found interesting, or just die in its infancy. I guess we will see. Without further ado, lets get started with episode #0.</p>
+<h2 id="can-programming-be-liberated-from-the-von-neumann-style-a-functional-style-and-its-algebra-of-programs"><a href="#can-programming-be-liberated-from-the-von-neumann-style-a-functional-style-and-its-algebra-of-programs" class="anchor fas fa-xs fa-link"></a>Can programming be liberated from the von Neumann style?: a functional style and its algebra of programs</h2>
+<p><a href="https://dl.acm.org/doi/10.1145/359138.359140">This</a> paper is a lecture given by John Backus at the 1978 ACM Turing Award ceremony. In case you’re unfamiliar, the ACM Turing Award is an annual price given by the <a href="https://en.wikipedia.org/wiki/Association_for_Computing_Machinery">Association for Computing Machinery (ACM)</a>. It is generally recognized as the highest distinction in computer science, and can be referred to as the “Nobel Prize of Computing”. It is a very interesting read, and I recommend it to anyone interested in the history of programming languages and functional programming. The paper is not very long or too technical, so it should be accessible to most people.</p>
+<p>For me the distinguishing feature of this paper is the enormous amount of influence it has had on modern programming languages, especially in the <a href="https://en.wikipedia.org/wiki/ML_(programming_language)">ML</a> family of programming languages like Haskell and OCaml. Backus basically describes an alternative way of programming, which he calls “applicative style”. This style is in many ways similar to what is nowadays called “pure functional programming”, although Backus took the idea a bit further and made it impossible to name function arguments. This results in a style more commonly known as “point-free programming”. The paper also contains a section on the “algebra of programs”, which is an important topic in its own right. In my opinion programming is still in it’s infancy in terms of mathematical rigor, and the algebra of programs is a step in the direction of more correct and rigorously defined programs. This is a topic close to my heart, and I will probably write more on it in the future.</p>
+<h2 id="bashing-the-von-neumann-style"><a href="#bashing-the-von-neumann-style" class="anchor fas fa-xs fa-link"></a>Bashing the von Neumann style</h2>
+<p>Backus writes in a very direct and almost condescending way about the current state of programming languages. He writes:</p>
+<blockquote>
+<p>Conventional programming languages are growing ever more enormous, but not stronger. Inherent defects at the most basic level cause them to be both fat and weak: their primitive word-at-a-time style of programming inherited from their common ancestor–the von Neumann computer, their close coupling of semantics to state transitions, their division of programming into a world of expressions and a world of statements, their inability to effectively use powerful combining forms for building new programs from existing ones, and their lack of useful mathematical properties for reasoning about programs.</p>
+</blockquote>
+<p>Remember that this is from <em>1978</em>, and yet it still feels very relevant today. Maybe even more relevant now, since most widely used languages today are <em>huge</em> and way bigger than the languages Backus was referring to.</p>
+<h2 id="my-implementation"><a href="#my-implementation" class="anchor fas fa-xs fa-link"></a>My implementation</h2>
+<p>I found the paper so interesting that I decided to implement the language described in it. I is fully open source, and can be found <a href="https://github.com/japiirainen/fp">here</a>. The GitHub repo contains a bunch of examples, many of which are from the paper itself. I will leave a small taste of the style described by Backus here in case it will inspire you to read the paper.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">{- Implementation of the Matrix Multiplication algorithm.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">-}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">Def</span> ip ≡ <span class="op">/+</span>∘α<span class="op">*</span>∘⍉</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">Def</span> mm ≡ α(α ip) ∘ α distl ∘ distr ∘ [<span class="op">~</span><span class="dv">0</span>, ⍉∘<span class="op">~</span><span class="dv">1</span>]</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>mm<span class="op">:&lt;</span> <span class="op">&lt;</span> <span class="op">&lt;</span><span class="dv">1</span>,<span class="dv">2</span><span class="op">&gt;</span>, <span class="op">&lt;</span><span class="dv">4</span>,<span class="dv">5</span><span class="op">&gt;</span> <span class="op">&gt;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>     <span class="op">&lt;</span> <span class="op">&lt;</span><span class="dv">6</span>,<span class="dv">8</span><span class="op">&gt;</span>, <span class="op">&lt;</span><span class="dv">7</span>,<span class="dv">9</span><span class="op">&gt;</span> <span class="op">&gt;</span> <span class="op">&gt;</span></span></code></pre></div>
+<p>Until next time!</p></section>
   </article>
 </main>
 

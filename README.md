@@ -105,3 +105,9 @@ able to do this.
    https://github.com/settings/secrets
 
 This website is based on [this](https://github.com/rpearce/hakyll-nix-template) template.
+
+### ideas for posts
+
+- modular arithmetics for programmers
+- finnish university degrees in CS are glorified <insert popular programming language> certificates
+
