@@ -9,20 +9,20 @@
                    type="application/rss+xml" />
         <lastBuildDate>Mon, 30 Jan 2023 12:00:00 UT</lastBuildDate>
         <item>
-    <title>Papers everyone should read #0</title>
+    <title>Influential papers #0</title>
     <link>https://japiirainen.xyz/posts/papers-0.html</link>
     <description><![CDATA[<main>
   <article>
     <header>
       <h1>
-        <a href="./posts/papers-0.html">Papers everyone should read #0</a>
+        <a href="./posts/papers-0.html">Influential papers #0</a>
       </h1>
       <div>
         <small>2023-01-30</small>
         
       </div>
     </header>
-    <section><p>This is the first episode of a (hopefully) long and fruitful journey through some of the most influential papers in the field of computer science. At least thats the intent, it might turn into a list of papers I have found interesting, or just die in its infancy. I guess we will see. The idea is not to repeat what is in the papers, but rather give a small taste of what they are about, and why I think they are worth reading. Without further ado, lets get started with episode #0.</p>
+    <section><p>This is the first episode of a (hopefully) long and fruitful series of posts where I go through academic papers that have been influential for me. I speculate most of these will touch the field of computer science in some form. I guess we will see. The idea is not to repeat what is in the papers, but rather give a small taste of what they are about, and why I think they are worth reading. Without further ado, lets get started with episode #0.</p>
 <h2 id="can-programming-be-liberated-from-the-von-neumann-style-a-functional-style-and-its-algebra-of-programs"><a href="#can-programming-be-liberated-from-the-von-neumann-style-a-functional-style-and-its-algebra-of-programs" class="anchor fas fa-xs fa-link"></a>Can programming be liberated from the von Neumann style?: a functional style and its algebra of programs</h2>
 <p><a href="https://dl.acm.org/doi/10.1145/359138.359140">This</a> paper is a lecture given by John Backus at the 1978 ACM Turing Award ceremony. In case you’re unfamiliar, the ACM Turing Award is an annual price given by the <a href="https://en.wikipedia.org/wiki/Association_for_Computing_Machinery">Association for Computing Machinery (ACM)</a>. It is generally recognized as the highest distinction in computer science, and can be referred to as the “Nobel Prize of Computing”. Overall the paper is a very interesting read, and I highly recommend it to anyone interested in the history of programming languages and functional programming. The paper is not very long or too technical, so it should be accessible to most people. The impact this paper has had on the design of many modern programming languages, especially in the <a href="https://en.wikipedia.org/wiki/ML_(programming_language)">ML</a> family like Haskell and OCaml is amazing.</p>
 <h2 id="what-is-the-paper-about"><a href="#what-is-the-paper-about" class="anchor fas fa-xs fa-link"></a>What is the paper about?</h2>

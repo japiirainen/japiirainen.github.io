@@ -3,15 +3,15 @@ author: "Joona Piirainen"
 desc: "John backus Turing Award Lecture 1978."
 keywords: "functional-programming, pl, turing-award, John Backus, fp"
 lang: "en"
-title: "Papers everyone should read #0"
+title: "Influential papers #0"
 date: "2023-01-30T12:00:00Z"
 ---
 
-This is the first episode of a (hopefully) long and fruitful journey through some of the most influential papers in the field of computer science. At least thats the intent, it might turn into a list of papers I have found interesting, or just die in its infancy. I guess we will see. The idea is not to repeat what is in the papers, but rather give a small taste of what they are about, and why I think they are worth reading. Without further ado, lets get started with episode #0.
+This is the first episode of a (hopefully) long and fruitful series of posts where I go through academic papers that have been influential for me. I speculate most of these will touch the field of computer science in some form. I guess we will see. The idea is not to repeat what is in the papers, but rather give a small taste of what they are about, and why I think they are worth reading. Without further ado, lets get started with episode #0.
 
 ## Can programming be liberated from the von Neumann style?: a functional style and its algebra of programs
 
-[This](https://dl.acm.org/doi/10.1145/359138.359140) paper is a lecture given by John Backus at the 1978 ACM Turing Award ceremony. In case you're unfamiliar, the ACM Turing Award is an annual price given by the [Association for Computing Machinery (ACM)](https://en.wikipedia.org/wiki/Association_for_Computing_Machinery). It is generally recognized as the highest distinction in computer science, and can be referred to as the "Nobel Prize of Computing". Overall the paper is a very interesting read, and I highly recommend it to anyone interested in the history of programming languages and functional programming. The paper is not very long or too technical, so it should be accessible to most people. The impact this paper has had on the design of many modern programming languages, especially in the [ML](https://en.wikipedia.org/wiki/ML_(programming_language)) family like Haskell and OCaml is amazing. 
+[This](https://dl.acm.org/doi/10.1145/359138.359140) paper is a lecture given by John Backus at the 1978 ACM Turing Award ceremony. In case you're unfamiliar, the ACM Turing Award is an annual price given by the [Association for Computing Machinery (ACM)](https://en.wikipedia.org/wiki/Association_for_Computing_Machinery). It is generally recognized as the highest distinction in computer science, and can be referred to as the "Nobel Prize of Computing". Overall the paper is a very interesting read, and I highly recommend it to anyone interested in the history of programming languages and functional programming. The paper is not very long or too technical, so it should be accessible to most people. The impact this paper has had on the design of many modern programming languages, especially in the [ML](https://en.wikipedia.org/wiki/ML_(programming_language)) family like Haskell and OCaml is amazing.
 
 ## What is the paper about?
 
