@@ -7,8 +7,274 @@
         <description><![CDATA[My personal website + blog]]></description>
         <atom:link href="https://japiirainen.xyz/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Mon, 30 Jan 2023 12:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sun, 11 Jun 2023 12:00:00 UT</lastBuildDate>
         <item>
+    <title>Polynomial interpolation</title>
+    <link>https://japiirainen.xyz/posts/polynomial-interpolation.html</link>
+    <description><![CDATA[<main>
+  <article>
+    <header>
+      <h1>
+        <a href="./posts/polynomial-interpolation.html">Polynomial interpolation</a>
+      </h1>
+      <div>
+        <small>2023-06-11</small>
+        
+      </div>
+    </header>
+    <section><p>Hello you lovely people! :-) Today I woke up with a strange urge to play with polynomials. Specifically I wanted to represent polynomials in code, since I hadn’t done that before.</p>
+<h2 id="what-is-a-polynomial"><a href="#what-is-a-polynomial" class="anchor fas fa-xs fa-link"></a>What is a <em>polynomial</em>?</h2>
+<p>I imagine most people have at least some vague memories of polynomials from high-school. At least I remember I hated them and
+didn’t understand what on earth would I ever do with them. I fear these kinds of memories from high-school math are quite common.
+Despite these harsh memories in this episode I’ll explore basic operations and theorems about polynomials.</p>
+<p><strong>Definition</strong>. A single variable <em>polynomial with a real coefficients</em> is a function <span class="math inline">\(f\)</span> that takes a real number as input, produces a real number as output and has the form</p>
+<p><span class="math display">\[
+f(x) = a_0 + a_1x + a_2x^2 + \cdot\cdot\cdot + a_nx^n,
+\]</span></p>
+<p>A good way to understand mathematical definitions is to write down plenty of examples. Here’s a couple of examples.</p>
+<p><span class="math display">\[ f(x) = 2 \]</span>
+<span class="math display">\[ f(x) = 2 + 4x + x^2 \]</span>
+<span class="math display">\[ f(x) = -8 + 3x + 9x^2 + 18x^3 \]</span></p>
+<p>Syntactically a polynomial defines three things: a <em>polynomial with real coefficients</em> (the function <em>f</em>),
+<em>coefficients</em> (the numbers <span class="math inline">\(a_i\)</span>), and a polynomial’s <em>degree</em> (the integer <span class="math inline">\(n\)</span>).</p>
+<h3 id="polynomials-as-curves-in-the-plane"><a href="#polynomials-as-curves-in-the-plane" class="anchor fas fa-xs fa-link"></a>Polynomials as curves in the plane</h3>
+<p>For me the easiest way to understand the <em>meaning</em> of polynomials is via interpreting them
+as curves in the plane. Polynomials (as any functions) can be represented as a set of pairs
+called <em>points</em>. That is, if you take each input <span class="math inline">\(t\)</span> and pair it up with its output <span class="math inline">\(f(x)\)</span>, you get a
+set of tuples <span class="math inline">\((t, f(t))\)</span>, which can be plotted as a curve in space, so that the horizontal direction represents
+the inputs and the vertical represents the output.</p>
+<h2 id="representation-in-code"><a href="#representation-in-code" class="anchor fas fa-xs fa-link"></a>Representation in code</h2>
+<p>We can represent a <span class="math inline">\(polynomial\)</span> in code as a list of numbers. I chose to also include the <em>indeterminate</em>,
+which is just a fancy word for the <span class="math inline">\(x\)</span> in previous examples.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">{-# LANGUAGE RecordWildCards #-}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> <span class="dt">Polynomial</span> <span class="kw">where</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.List</span> (intersperse, foldl&#39;)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Map</span> (<span class="dt">Map</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Data.Bifunctor</span> (bimap)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="dt">Control.Monad</span> (join)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="kw">qualified</span> <span class="dt">Data.Map</span> <span class="kw">as</span> <span class="dt">Map</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="kw">qualified</span> <span class="dt">Data.Set</span> <span class="kw">as</span> <span class="dt">Set</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> <span class="dt">Polynomial</span> <span class="ot">=</span> <span class="dt">Polynomial</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  {<span class="ot"> indeterminate ::</span> <span class="dt">Char</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  ,<span class="ot"> coefficients ::</span> [<span class="dt">Float</span>]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="ot">poly ::</span> [<span class="dt">Float</span>] <span class="ot">-&gt;</span> <span class="dt">Polynomial</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>poly <span class="ot">=</span> <span class="dt">Polynomial</span> <span class="ch">&#39;x&#39;</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ot">zero ::</span> <span class="dt">Polynomial</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>zero <span class="ot">=</span> poly []</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">Show</span> <span class="dt">Polynomial</span> <span class="kw">where</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">show</span> <span class="dt">Polynomial</span>{<span class="op">..</span>} <span class="ot">=</span> join <span class="op">$</span> intersperse <span class="st">&quot; + &quot;</span> <span class="op">$</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">map</span> f (<span class="fu">zip</span> coefficients [<span class="dv">0</span><span class="op">..</span>])</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>      f (coe, <span class="dv">0</span>) <span class="ot">=</span> <span class="fu">show</span> coe</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>      f (coe, <span class="dv">1</span>) <span class="ot">=</span> <span class="fu">show</span> coe <span class="op">&lt;&gt;</span> <span class="fu">pure</span> indeterminate</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>      f (coe, idx) <span class="ot">=</span> <span class="fu">show</span> coe <span class="op">&lt;&gt;</span> <span class="fu">pure</span> indeterminate <span class="op">&lt;&gt;</span> <span class="st">&quot;^&quot;</span> <span class="op">&lt;&gt;</span> <span class="fu">show</span> idx</span></code></pre></div>
+<p>With this simple machinery we can construct and <em>“pretty print”</em> polynomials.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="ot">=</span> poly [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1.0</span> <span class="op">+</span> 2x <span class="op">+</span> 3x<span class="op">^</span><span class="dv">3</span></span></code></pre></div>
+<h2 id="addition-and-multiplication-of-polynomials"><a href="#addition-and-multiplication-of-polynomials" class="anchor fas fa-xs fa-link"></a>Addition and Multiplication of <em>polynomials</em></h2>
+<p>I will walk throught these definitions in a very informal manner for brevity. Let’s start by introducing two distinct polynomials.</p>
+<p><span class="math display">\[
+f(x) = 1 + 2x + 3x^2
+\]</span></p>
+<p><span class="math display">\[
+g(x) = -8 + 17x + x^2 + 5x^3
+\]</span></p>
+<p>We can add these <em>polynomials</em> together. Addition of <em>polynomials</em> works basically as you would expect from
+experience with adding numbers.</p>
+<p><span class="math display">\[
+f + x = -7 + 19x + 4x^2 + 5x^3
+\]</span></p>
+<p>Multiplication is a bit more complicated. <a href="https://www.mathsisfun.com/algebra/polynomials-multiplying.html">Here</a>’s a nice exlanation on how one might think about polynomial multiplication.</p>
+<p><span class="math display">\[
+f \cdot x = -8 + 1x + 11x^2 + 58x^3 + 13x^4 + 15x^5
+\]</span></p>
+<p>Some basic properties of <em>polynomial</em> addition and multiplication.</p>
+<p><span class="math display">\[
+f + zero = f
+\]</span></p>
+<p><span class="math display">\[
+zero + f = f
+\]</span></p>
+<p><span class="math display">\[
+f + g = g + f
+\]</span></p>
+<p><span class="math display">\[
+f \cdot 1 = f
+\]</span></p>
+<p><span class="math display">\[
+1 \cdot f = f
+\]</span></p>
+<p><span class="math display">\[
+f \cdot g = g \cdot f
+\]</span></p>
+<h3 id="polynomial-addition-and-multiplication-in-code"><a href="#polynomial-addition-and-multiplication-in-code" class="anchor fas fa-xs fa-link"></a><em>Polynomial</em> addition and multiplication in code</h3>
+<p>We can define addition of polynomials by recursively adding the matching <span class="math inline">\(coefficients\)</span>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ot">polyadd ::</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>polyadd [] ys <span class="ot">=</span> ys</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>polyadd xs [] <span class="ot">=</span> xs</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>polyadd (x<span class="op">:</span>xs) (y<span class="op">:</span>ys) <span class="ot">=</span> (x<span class="op">+</span>y) <span class="op">:</span> polyadd xs ys</span></code></pre></div>
+<p>Multiplication can be defined mostly by delegating work to previously defined <code>polyadd</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">polymult ::</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>polymult ys <span class="ot">=</span> <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> polyadd (<span class="fu">map</span> (x<span class="op">*</span>) ys) (<span class="dv">0</span> <span class="op">:</span> acc)) []</span></code></pre></div>
+<p>Next we can define a <code>Num</code> instance for <em>polynomials</em> so we can use familiar notation. (<span class="math inline">\(f + g\)</span>, <span class="math inline">\(f * g\)</span>, …)</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ot">(...) ::</span> (c <span class="ot">-&gt;</span> d) <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> d</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>(<span class="op">...</span>) f g a b <span class="ot">=</span> f <span class="op">$</span> g a b</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">infixl</span> <span class="dv">8</span> <span class="op">...</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ot">coes ::</span> (<span class="dt">Polynomial</span>, <span class="dt">Polynomial</span>) <span class="ot">-&gt;</span> ([<span class="dt">Float</span>], [<span class="dt">Float</span>])</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>coes <span class="ot">=</span> (bimap coefficients coefficients)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">instance</span> <span class="dt">Num</span> <span class="dt">Polynomial</span> <span class="kw">where</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  (<span class="op">+</span>) <span class="ot">=</span> poly <span class="op">.</span> <span class="fu">uncurry</span> polyadd <span class="op">.</span> coes <span class="op">...</span> (,)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  (<span class="op">*</span>) <span class="ot">=</span> poly <span class="op">.</span> <span class="fu">uncurry</span> polymult <span class="op">.</span> coes <span class="op">...</span> (,)</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">negate</span> <span class="ot">=</span> poly <span class="op">.</span> (<span class="fu">map</span> <span class="fu">negate</span>) <span class="op">.</span> coefficients</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">abs</span> <span class="ot">=</span> poly <span class="op">.</span> (<span class="fu">map</span> <span class="fu">abs</span>) <span class="op">.</span> coefficients</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">signum</span> <span class="ot">=</span> poly <span class="op">.</span> (<span class="fu">map</span> <span class="fu">signum</span>) <span class="op">.</span> coefficients</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fromInteger</span> x <span class="ot">=</span> poly (<span class="fu">pure</span> (<span class="fu">fromInteger</span> x))</span></code></pre></div>
+<p>Now we can imitate the math in Haskell!</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="ot">=</span> poly [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> g <span class="ot">=</span> poly [<span class="op">-</span><span class="dv">8</span>, <span class="dv">17</span>, <span class="dv">1</span>, <span class="dv">5</span>]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="op">+</span> g</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">7</span> <span class="op">+</span> 19x <span class="op">+</span> 4x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> 5x<span class="op">^</span><span class="dv">3</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="op">*</span> c</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">8</span> <span class="op">+</span> 1x <span class="op">+</span> 11x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> 58x<span class="op">^</span><span class="dv">3</span> <span class="op">+</span> 13x<span class="op">^</span><span class="dv">4</span> <span class="op">+</span> 15x<span class="op">^</span><span class="dv">5</span></span></code></pre></div>
+<h2 id="existence-uniqueness"><a href="#existence-uniqueness" class="anchor fas fa-xs fa-link"></a><em>Existence &amp; Uniqueness</em></h2>
+<p>Finally onto the main focus of this post, <em>existence &amp; uniqueness</em> of <em>polynomials</em>.</p>
+<p><strong>Theorem</strong>. <em>For any integer <span class="math inline">\(n \geq 0\)</span> and any list of <span class="math inline">\(n - 1\)</span> points
+<span class="math inline">\((x_1,y_1),(x_2,y_2),...,(x_{n+1},y_{n+1})\)</span> in <span class="math inline">\(\mathbb{R}^2\)</span></em> with
+<span class="math inline">\(x_1 &lt; x_2 &lt; \cdot \cdot \cdot &lt; x_{n+1}\)</span> there exists polynomial <span class="math inline">\(p(x)\)</span> of
+degree at most <span class="math inline">\(n\)</span> such that <span class="math inline">\(p(x_i) = y_i\)</span> for all <span class="math inline">\(i\)</span>.</p>
+<p>A more informal way to state the theorem: there is a unique degree <span class="math inline">\(n\)</span> polynomial
+passing through a choice of <span class="math inline">\(n + 1\)</span> points. Let’s start with examples (as one should). The simplest
+example is <span class="math inline">\(n = 0\)</span>, such that <span class="math inline">\(n + 1 = 1\)</span> and we are working with a single point. I’ll pick
+<span class="math inline">\((2, 3)\)</span> as a random point. The theorem asserts that there is a unique degree zero polynomial passing through this point.
+What function would yield <span class="math inline">\(f(2) = 3\)</span>? Well there’s no other choice but <span class="math inline">\(f(x) = 3\)</span>. As a
+slightly more complicated example we set <span class="math inline">\(n = 1\)</span> and thus <span class="math inline">\(n + 1 = 2\)</span> points, say <span class="math inline">\((2,3), (7,4)\)</span>.
+Here the theorem claims a unique degree 1 polynomial <span class="math inline">\(f\)</span> with <span class="math inline">\(f(2) = 3\)</span> and <span class="math inline">\(f(7) = 4\)</span>.</p>
+<p>Let’s recall what a degree 1 polynomial looks like.</p>
+<p><span class="math display">\[
+f(x) = a_0 + a_1x
+\]</span></p>
+<p>Write down the matching equations for our points <span class="math inline">\((2,3), (7,4)\)</span>.</p>
+<p><span class="math display">\[
+a_0 + a_1 \cdot 2 = 3
+\]</span></p>
+<p><span class="math display">\[
+a_0 + a_1 \cdot 7 = 4
+\]</span></p>
+<p>If we solve for <span class="math inline">\(a_0\)</span> in the first equation, we get <span class="math inline">\(a_0 = 3 - 2a\)</span>. Substituting
+that into the second equation yields <span class="math inline">\((3 - 2a_1) + a_1 \cdot 7 = 4\)</span>, which solves
+for <span class="math inline">\(a = 1/5\)</span>. Substituting this back into the first equation gives <span class="math inline">\(a_0 = 3 - 2/5\)</span>.
+This forces the polynomial to be exactly</p>
+<p><span class="math display">\[
+f(x) = (3 - \frac{2}{5}) + \frac{1}{5}x = \frac{13}{5} + \frac{1}{5}x
+\]</span></p>
+<p>Thinking geometrically, a degree 1 polynomial is a line. The example above reinforces the fact
+that there is a unique line between any two points.</p>
+<h3 id="working-our-way-up-to-a-proof."><a href="#working-our-way-up-to-a-proof." class="anchor fas fa-xs fa-link"></a>Working our way up to a proof.</h3>
+<p>If we want to prove these kinds of theorems we can’t really pick specific points as we
+did above. Instead we need to be more generic. Let’s start from scratch and
+start with a single point <span class="math inline">\((x_1, y_1)\)</span> and set <span class="math inline">\(n = 0\)</span>. This case is trivially <span class="math inline">\(f(x) = y_1\)</span>.
+Next up two points <span class="math inline">\((x_1, y_1), (x_2, y_2)\)</span>. We can write down the polynomial in this
+rather strange way.</p>
+<p><span class="math display">\[
+f(x) = y_1\frac{x-x_2}{x_1-x_2} + y_2\frac{x-x_1}{x_2-x_1}
+\]</span></p>
+<p>If I evaluate <span class="math inline">\(f\)</span> at <span class="math inline">\(x_1\)</span>, the second term gets <span class="math inline">\(x_1 - x_1 = 0\)</span> in the numerator
+and so the second term is zero. The first term, however becomes <span class="math inline">\(y_1\frac{x_1-x_2}{x_1+x_2}=y_1\cdot 1\)</span>
+, which is what we wanted. Notice that we don’t need to wory about <span class="math inline">\(0/0\)</span> since we have
+explicitly disallowed <span class="math inline">\(x_1 = x_2\)</span>. Likewise, if you evaluate <span class="math inline">\(f(x_2)\)</span> the first term is zero
+and the second term evaluates to <span class="math inline">\(y_2\)</span>. Thus we have both <span class="math inline">\(f(x_1) = y_1\)</span> and <span class="math inline">\(f(x_2) = y_2\)</span>
+and the expression is a degree 1 polynomial! The reason we wrote the polynomial in this
+strange way is that each constraint (e.g. <span class="math inline">\(f(x_1) = y_1\)</span>) could be isolated in its own term.
+For three points we just have to maintain that same property.</p>
+<p><span class="math display">\[
+f(x) = y_1\frac{(x-x_2)(x-x_3)}{(x_1-x_2)(x_1-x_3)} +
+       y_2\frac{(x-x_1)(x-x_3)}{(x_2-x_1)(x_2-x_3)} +
+       y_3\frac{(x-x_1)(x-x_2)}{(x_3-x_1)(x_3-x_2)}
+\]</span></p>
+<p>The general formula for <span class="math inline">\(n\)</span> points should follow the same pattern. Add up
+a bunch of terms, and for the <span class="math inline">\(i\)</span>-th term you multiply <span class="math inline">\(y_i\)</span> by a fraction you
+construct according to the rule: the numerator is the product of <span class="math inline">\(x - x_j\)</span> for every
+<span class="math inline">\(j\)</span> except <span class="math inline">\(i\)</span>, and the denominator is a product of all the <span class="math inline">\((x_i,x_j)\)</span> for the same
+<span class="math inline">\(j\)</span>’s as the numerator.</p>
+<p><span class="math display">\[
+f(x) = \sum_{i=1}^{n} y_i \cdot \left( \prod_{j\neq i} \frac{x-x_j}{x_i-x_j} \right)
+\]</span></p>
+<p>Now we can proceed with our proof.</p>
+<p><strong>Proof</strong>. <em>Let <span class="math inline">\((x_1, y_1),...,(x_{n+1}, y_{n+1})\)</span> be a list of <span class="math inline">\(n + 1\)</span> points with
+no two <span class="math inline">\(x_i\)</span> the same. To show existence, construct <span class="math inline">\(f(x)\)</span> as</em></p>
+<p><span class="math display">\[
+f(x) = \sum_{i=1}^{n+1} y_i \prod_{j\neq i} \frac{x-x_j}{x_i-x_j}
+\]</span></p>
+<p>Cleary the constructed polynomial <span class="math inline">\(f(x)\)</span> has degree at most <span class="math inline">\(n\)</span> because each term
+has degree <span class="math inline">\(n\)</span>. For each <span class="math inline">\(i\)</span>, plugging in <span class="math inline">\(x_i\)</span> causes all but the <span class="math inline">\(i\)</span>-th term in the
+sum to vanish, and the <span class="math inline">\(i\)</span>-th term evaluates to <span class="math inline">\(y_i\)</span> as desired.
+To show uniqueness, let <span class="math inline">\(g(x)\)</span> be another polynomial that passes through the same
+set of points given in the theorem. We will show that <span class="math inline">\(f = g\)</span>. Examine <span class="math inline">\(f - g\)</span>.
+It is a polynomial with degree at most <span class="math inline">\(n\)</span> which has all of the <span class="math inline">\(n - 1\)</span> values <span class="math inline">\(x_i\)</span>
+as roots. We conclude that <span class="math inline">\(f - g\)</span> is the zero polynomial, or equivalently that <span class="math inline">\(f = g\)</span>.
+<span class="math inline">\(\square\)</span></p>
+<p>Phew, math is hard…</p>
+<h3 id="now-the-same-in-code"><a href="#now-the-same-in-code" class="anchor fas fa-xs fa-link"></a>Now the same in code</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> <span class="dt">Point</span> <span class="ot">=</span> (<span class="dt">Float</span>, <span class="dt">Float</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ot">singleTerm ::</span> [<span class="dt">Point</span>] <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Polynomial</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>singleTerm points i <span class="ot">=</span> theTerm <span class="op">*</span> poly [yi]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">where</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    (xi, yi) <span class="ot">=</span> points <span class="op">!!</span> i</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    f acc (p, j) <span class="ot">=</span> <span class="kw">if</span> j <span class="op">==</span> i <span class="kw">then</span> acc <span class="kw">else</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">let</span> xj <span class="ot">=</span> (<span class="fu">fst</span> p) <span class="kw">in</span> acc <span class="op">*</span> poly [<span class="op">-</span>xj <span class="op">/</span> (xi <span class="op">-</span> xj), <span class="dv">1</span> <span class="op">/</span> (xi <span class="op">-</span> xj)]</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    theTerm <span class="ot">=</span> foldl&#39; f (poly (<span class="fu">pure</span> <span class="dv">1</span>)) (<span class="fu">zip</span> points [<span class="dv">0</span><span class="op">..</span>])</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">-- | Return the unique polynomial of degree at most n passing through the given n+1 points.</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="ot">interpolate ::</span> [<span class="dt">Point</span>] <span class="ot">-&gt;</span> <span class="dt">Polynomial</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>interpolate [] <span class="ot">=</span> <span class="fu">error</span> <span class="st">&quot;Must provide at least one point.&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>interpolate xs</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="fu">length</span> (<span class="fu">map</span> <span class="fu">fst</span> xs) <span class="op">&gt;</span> Set.size (Set.fromList (<span class="fu">map</span> <span class="fu">fst</span> xs)) <span class="ot">=</span> <span class="fu">error</span> <span class="st">&quot;Not all x values are distinct.&quot;</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">|</span> <span class="fu">otherwise</span> <span class="ot">=</span> foldl&#39; (<span class="op">+</span>) zero terms</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>      terms <span class="ot">=</span> <span class="fu">map</span> (singleTerm xs) [<span class="dv">0</span><span class="op">..</span>(<span class="fu">length</span> xs)<span class="op">-</span><span class="dv">1</span>]</span></code></pre></div>
+<p>The code basically mirrors the math described earlier, except for one place.
+We had to break up the degree-1 polynomial <span class="math inline">\(\frac{x-x_j}{x_i-x_j}\)</span> into its
+coefficients, which are <span class="math inline">\(a_0 = \frac{-x_j}{x_1-x_j}\)</span> and <span class="math inline">\(a_1 = \frac{1}{x_i-x_j}\)</span>.</p>
+<p>Some examples:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ot">main ::</span> <span class="dt">IO</span> ()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>main <span class="ot">=</span> <span class="kw">do</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> f <span class="ot">=</span> poly [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ^ f(x) = 1 + 2x + 3x^2</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> g <span class="ot">=</span> poly [<span class="op">-</span><span class="dv">8</span>, <span class="dv">17</span>, <span class="dv">1</span>, <span class="dv">5</span>]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ^ g(x) = -8 + 17x + x^2 + 5x^3</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="op">$</span> interpolate [(<span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">0</span>)]</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ^ 2.0 + -1.0x</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="op">$</span> interpolate [(<span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">4</span>), (<span class="dv">7</span>, <span class="dv">9</span>)]</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ^ -2.66665 + 4.0x + -0.3333333333333334x^2</span></span></code></pre></div>
+<p>Excuse the rounding errors :-)</p>
+<p>The full code for this episode can be found <a href="https://github.com/japiirainen/gists/blob/main/Polynomial.hs">here</a>.</p></section>
+  </article>
+</main>
+
+<hr />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+]]></description>
+    <pubDate>Sun, 11 Jun 2023 12:00:00 UT</pubDate>
+    <guid>https://japiirainen.xyz/posts/polynomial-interpolation.html</guid>
+    <dc:creator>Joona Piirainen</dc:creator>
+</item>
+<item>
     <title>Influential papers #0</title>
     <link>https://japiirainen.xyz/posts/papers-0.html</link>
     <description><![CDATA[<main>
