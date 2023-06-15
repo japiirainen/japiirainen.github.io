@@ -259,6 +259,7 @@ coefficients, which are <span class="math inline">\(a_0 = \frac{-x_j}{x_1-x_j}\)
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span> <span class="op">$</span> interpolate [(<span class="dv">1</span>, <span class="dv">1</span>), (<span class="dv">2</span>, <span class="dv">4</span>), (<span class="dv">7</span>, <span class="dv">9</span>)]</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- ^ -2.66665 + 4.0x + -0.3333333333333334x^2</span></span></code></pre></div>
 <p>Excuse the rounding errors :-)</p>
+<p>Thanks for reading and see you next time!</p>
 <p>The full code for this episode can be found <a href="https://github.com/japiirainen/gists/blob/main/Polynomial.hs">here</a>.</p></section>
   </article>
 </main>

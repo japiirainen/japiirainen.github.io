@@ -332,4 +332,6 @@ main = do
 
 Excuse the rounding errors :-)
 
+Thanks for reading and see you next time!
+
 The full code for this episode can be found [here](https://github.com/japiirainen/gists/blob/main/Polynomial.hs).
