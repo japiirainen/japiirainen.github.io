@@ -10,3 +10,4 @@ dist
 dist-newstyle
 node_modules
 result
+.direnv/
