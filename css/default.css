@@ -64,7 +64,8 @@ p {
 }
 pre.sourceCode,
 pre.Agda,
-code {
+code,
+div.MathJax_Display {
   font-family: JuliaMono-Regular;
   overflow-y: scroll;
 }
