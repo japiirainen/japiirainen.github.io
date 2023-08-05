@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Monoids are cool</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Verified definition of monoids in agda and exploration of some cool monoids." />
+    
+    <meta name="author" content="Joona Piirainen" />
+     
+    <meta name="keywords" content="agda, monoids, algebra, functional-programming, dependent-types" />
+    
+
+    <meta property="og:site_name" content="japiirainen" />
+    <meta property="og:title" content="Monoids are cool" />
+    <meta property="og:url" content="https://japiirainen.xyz/posts/Monoids.html" />
+    <meta property="og:description" content="Verified definition of monoids in agda and exploration of some cool monoids." />
+     
+    <meta property="og:type" content="article" />
+    
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:site" content="japiirainen" />
+    <meta property="twitter:title" content="Monoids are cool" />
+    <meta property="twitter:description" content="Verified definition of monoids in agda and exploration of some cool monoids." />
+     
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="canonical" href="https://japiirainen.xyz/posts/Monoids.html" />
+    <link rel="stylesheet" href="../css/default.css" />
+    <link rel="stylesheet" href="../css/agda.css" />
+    <link rel="stylesheet" href="../css/code.css" />
+    <script
+      type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    ></script>
+  </head>
+  <body>
+    <main>
+  <article>
+    <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
+      <h1>
+        <a href="/posts/Monoids.html">Monoids are cool</a>
+      </h1>
+      <div>
+        <small>2023-08-05</small>
+        
+      </div>
+    </header>
+    <section><p>It is common for an <code>Agda</code> module to begin with a bunch of module headers and imports, this one is no exception :-).</p>
+<pre class="Agda"><a id="389" class="Symbol">{-#</a> <a id="393" class="Keyword">OPTIONS</a> <a id="401" class="Pragma">--safe</a> <a id="408" class="Pragma">--guardedness</a> <a id="422" class="Pragma">--cubical-compatible</a> <a id="443" class="Symbol">#-}</a>
+<a id="447" class="Keyword">module</a> <a id="454" href="Monoids.html" class="Module">Monoids</a> <a id="462" class="Keyword">where</a>
+
+<a id="469" class="Keyword">open</a> <a id="474" class="Keyword">import</a> <a id="481" href="Level.html" class="Module">Level</a>
+<a id="487" class="Keyword">open</a> <a id="492" class="Keyword">import</a> <a id="499" href="Data.Nat.html" class="Module">Data.Nat</a> <a id="508" class="Keyword">using</a> <a id="514" class="Symbol">(</a><a id="515" href="Agda.Builtin.Nat.html#319" class="Primitive Operator">_+_</a><a id="518" class="Symbol">)</a>
+<a id="520" class="Keyword">open</a> <a id="525" class="Keyword">import</a> <a id="532" href="Relation.Binary.PropositionalEquality.html" class="Module">Relation.Binary.PropositionalEquality</a> <a id="570" class="Keyword">using</a> <a id="576" class="Symbol">(</a><a id="577" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a><a id="581" class="Symbol">;</a> <a id="583" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">_≡_</a><a id="586" class="Symbol">)</a>
+</pre>
+<p>One neat feature of <code>Agda</code> is it’s <code>variable</code> blocks. They let you generalize over variables in types.
+In practice a <code>variable</code> block let’s you omit a bunch of detail from definitions since you can directly
+use the variables defined in the <code>variable</code> block. I think this will make since once you see it in action.</p>
+<pre class="Agda"><a id="916" class="Keyword">variable</a>
+  <a id="927" href="Monoids.html#927" class="Generalizable">ℓ</a> <a id="929" class="Symbol">:</a> <a id="931" href="Agda.Primitive.html#591" class="Postulate">Level</a>
+  <a id="939" href="Monoids.html#939" class="Generalizable">A</a> <a id="941" class="Symbol">:</a> <a id="943" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="947" href="Monoids.html#927" class="Generalizable">ℓ</a>
+</pre>
+<pre class="Agda"><a id="level-of"></a><a id="962" href="Monoids.html#962" class="Function">level-of</a> <a id="971" class="Symbol">:</a> <a id="973" class="Symbol">{</a><a id="974" href="Monoids.html#974" class="Bound">ℓ</a> <a id="976" class="Symbol">:</a> <a id="978" href="Agda.Primitive.html#591" class="Postulate">Level</a><a id="983" class="Symbol">}</a> <a id="985" class="Symbol">→</a> <a id="987" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="991" href="Monoids.html#974" class="Bound">ℓ</a> <a id="993" class="Symbol">→</a> <a id="995" href="Agda.Primitive.html#591" class="Postulate">Level</a>
+<a id="1001" href="Monoids.html#962" class="Function">level-of</a> <a id="1010" class="Symbol">{</a><a id="1011" href="Monoids.html#1011" class="Bound">ℓ</a><a id="1012" class="Symbol">}</a> <a id="1014" class="Symbol">_</a> <a id="1016" class="Symbol">=</a> <a id="1018" href="Monoids.html#1011" class="Bound">ℓ</a>
+
+<a id="1021" class="Keyword">record</a> <a id="is-semigroup"></a><a id="1028" href="Monoids.html#1028" class="Record">is-semigroup</a> <a id="1041" class="Symbol">(</a><a id="1042" href="Monoids.html#1042" class="Bound Operator">_★_</a> <a id="1046" class="Symbol">:</a> <a id="1048" href="Monoids.html#939" class="Generalizable">A</a> <a id="1050" class="Symbol">→</a> <a id="1052" href="Monoids.html#939" class="Generalizable">A</a> <a id="1054" class="Symbol">→</a> <a id="1056" href="Monoids.html#939" class="Generalizable">A</a><a id="1057" class="Symbol">)</a> <a id="1059" class="Symbol">:</a> <a id="1061" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1065" class="Symbol">(</a><a id="1066" href="Monoids.html#962" class="Function">level-of</a> <a id="1075" href="Monoids.html#1048" class="Bound">A</a><a id="1076" class="Symbol">)</a> <a id="1078" class="Keyword">where</a>
+  <a id="1086" class="Keyword">field</a>
+    <a id="is-semigroup.assoc"></a><a id="1096" href="Monoids.html#1096" class="Field">assoc</a> <a id="1102" class="Symbol">:</a> <a id="1104" class="Symbol">∀</a> <a id="1106" href="Monoids.html#1106" class="Bound">x</a> <a id="1108" href="Monoids.html#1108" class="Bound">y</a> <a id="1110" href="Monoids.html#1110" class="Bound">z</a> <a id="1112" class="Symbol">→</a> <a id="1114" href="Monoids.html#1106" class="Bound">x</a> <a id="1116" href="Monoids.html#1042" class="Bound Operator">★</a> <a id="1118" class="Symbol">(</a><a id="1119" href="Monoids.html#1108" class="Bound">y</a> <a id="1121" href="Monoids.html#1042" class="Bound Operator">★</a> <a id="1123" href="Monoids.html#1110" class="Bound">z</a><a id="1124" class="Symbol">)</a> <a id="1126" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="1128" class="Symbol">(</a><a id="1129" href="Monoids.html#1106" class="Bound">x</a> <a id="1131" href="Monoids.html#1042" class="Bound Operator">★</a> <a id="1133" href="Monoids.html#1108" class="Bound">y</a><a id="1134" class="Symbol">)</a> <a id="1136" href="Monoids.html#1042" class="Bound Operator">★</a> <a id="1138" href="Monoids.html#1110" class="Bound">z</a>
+
+<a id="1141" class="Keyword">record</a> <a id="Semigroup"></a><a id="1148" href="Monoids.html#1148" class="Record">Semigroup</a> <a id="1158" class="Symbol">(</a><a id="1159" href="Monoids.html#1159" class="Bound">A</a> <a id="1161" class="Symbol">:</a> <a id="1163" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1167" href="Monoids.html#927" class="Generalizable">ℓ</a><a id="1168" class="Symbol">)</a> <a id="1170" class="Symbol">:</a> <a id="1172" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1176" href="Monoids.html#1167" class="Bound">ℓ</a> <a id="1178" class="Keyword">where</a>
+  <a id="1186" class="Keyword">infixl</a> <a id="1193" class="Number">5</a> <a id="1195" href="Monoids.html#1211" class="Field Operator">_★_</a>
+  <a id="1201" class="Keyword">field</a>
+    <a id="Semigroup._★_"></a><a id="1211" href="Monoids.html#1211" class="Field Operator">_★_</a> <a id="1215" class="Symbol">:</a> <a id="1217" href="Monoids.html#1159" class="Bound">A</a> <a id="1219" class="Symbol">→</a> <a id="1221" href="Monoids.html#1159" class="Bound">A</a> <a id="1223" class="Symbol">→</a> <a id="1225" href="Monoids.html#1159" class="Bound">A</a>
+    <a id="Semigroup.has-is-semigroup"></a><a id="1231" href="Monoids.html#1231" class="Field">has-is-semigroup</a> <a id="1248" class="Symbol">:</a> <a id="1250" href="Monoids.html#1028" class="Record">is-semigroup</a> <a id="1263" href="Monoids.html#1211" class="Field Operator">_★_</a>
+
+  <a id="1270" class="Keyword">open</a> <a id="1275" href="Monoids.html#1028" class="Module">is-semigroup</a> <a id="1288" href="Monoids.html#1231" class="Field">has-is-semigroup</a>
+
+<a id="1306" class="Comment">-- look ma, terms in types</a>
+<a id="1333" href="Monoids.html#1333" class="Function">_</a> <a id="1335" class="Symbol">:</a> <a id="1337" class="Number">1</a> <a id="1339" href="Agda.Builtin.Nat.html#319" class="Primitive Operator">+</a> <a id="1341" class="Number">1</a> <a id="1343" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="1345" class="Number">2</a>
+<a id="1347" class="Symbol">_</a> <a id="1349" class="Symbol">=</a> <a id="1351" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
+</pre></section>
+  </article>
+</main>
+
+<hr />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+
+    <script async src="./js/script.js"></script>
+  </body>
+</html>

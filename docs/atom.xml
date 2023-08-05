@@ -20,8 +20,11 @@
     <summary type="html"><![CDATA[<main>
   <article>
     <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
       <h1>
-        <a href="./posts/polynomial-interpolation.html">Polynomial interpolation</a>
+        <a href="/posts/polynomial-interpolation.html">Polynomial interpolation</a>
       </h1>
       <div>
         <small>2023-06-11</small>
@@ -287,8 +290,11 @@ coefficients, which are <span class="math inline">\(a_0 = \frac{-x_j}{x_1-x_j}\)
     <summary type="html"><![CDATA[<main>
   <article>
     <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
       <h1>
-        <a href="./posts/papers-0.html">Influential papers #0</a>
+        <a href="/posts/papers-0.html">Influential papers #0</a>
       </h1>
       <div>
         <small>2023-01-30</small>
@@ -338,8 +344,11 @@ coefficients, which are <span class="math inline">\(a_0 = \frac{-x_j}{x_1-x_j}\)
     <summary type="html"><![CDATA[<main>
   <article>
     <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
       <h1>
-        <a href="./posts/hello-world.html">Hello, world!</a>
+        <a href="/posts/hello-world.html">Hello, world!</a>
       </h1>
       <div>
         <small>2023-01-23</small>
