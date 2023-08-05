@@ -34,7 +34,9 @@ button {
   -moz-osx-font-smoothing: grayscale;
 }
 main,
-footer {
+footer,
+header,
+hr {
   max-width: 1200px;
   margin: 0 auto;
 }
