@@ -1,19 +1,21 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 import Control.Monad (forM_)
+import Data.List (isSuffixOf)
 import Data.Maybe (fromMaybe)
 import Data.String
-import Data.List (isSuffixOf)
+import Data.Time.Clock
 import Hakyll
 import System.Directory
 import System.Exit
-import System.FilePattern ((?==))
 import System.FilePath
+import System.FilePattern ((?==))
 import System.Process
-import Text.Pandoc
-import Text.Pandoc.Walk
+import Text.Pandoc hiding (getCurrentTime)
 import Text.Pandoc.Builder
 import Text.Pandoc.Highlighting
+import Text.Pandoc.Walk
 
 --------------------------------------------------------------------------------
 -- CONFIG
@@ -43,6 +45,7 @@ config =
 main :: IO ()
 main = do
   processAgdaPosts
+  date <- getCurrentTime >>= return . show @Double . fromRational . toRational . utctDayTime
   hakyllWith config $ do
     forM_
       [ "CNAME"
@@ -100,6 +103,7 @@ main = do
               listField "posts" postCtx (return posts)
                 <> constField "root" root
                 <> constField "siteName" siteName
+                <> constField "date" date
                 <> defaultContext
 
         getResourceBody
@@ -145,7 +149,6 @@ main = do
     create ["css/code.css"] $ do
       route idRoute
       compile (makeStyle pandocHighlightStyle)
-
 
 --------------------------------------------------------------------------------
 -- COMPILER HELPERS
@@ -239,7 +242,6 @@ pandocCompilerCustom =
         )
     prependAnchor x = x
 
-
 pandocHighlightStyle :: Style
 pandocHighlightStyle =
   tango -- https://hackage.haskell.org/package/pandoc/docs/Text-Pandoc-Highlighting.html
@@ -267,7 +269,6 @@ feedConfiguration =
     , feedAuthorEmail = "joona.piirainen@gmail.com"
     , feedRoot = root
     }
-
 
 titleRoute :: Routes
 titleRoute = idRoute `composeRoutes` setExtension "html"

@@ -28,9 +28,9 @@
 
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="canonical" href="https://japiirainen.xyz/posts/polynomial-interpolation.html" />
-    <link rel="stylesheet" href="../css/default.css" />
-    <link rel="stylesheet" href="../css/agda.css" />
-    <link rel="stylesheet" href="../css/code.css" />
+    <link rel="stylesheet" href="../css/default.css?2023-06-11" />
+    <link rel="stylesheet" href="../css/agda.css?2023-06-11" />
+    <link rel="stylesheet" href="../css/code.css?2023-06-11" />
     <script
       type="text/javascript"
       src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
@@ -108,7 +108,7 @@ which is just a fancy word for the <span class="math inline">\(x\)</span> in pre
 <p>With this simple machinery we can construct and <em>“pretty print”</em> polynomials.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="ot">=</span> poly [<span class="dv">1</span> <span class="dv">2</span> <span class="dv">3</span>]</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1.0</span> <span class="op">+</span> 2x <span class="op">+</span> 3x<span class="op">^</span><span class="dv">3</span></span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fl">1.0</span> <span class="op">+</span> <span class="dv">2</span>x <span class="op">+</span> <span class="dv">3</span>x<span class="op">^</span><span class="dv">3</span></span></code></pre></div>
 <h2 id="addition-and-multiplication-of-polynomials"><a href="#addition-and-multiplication-of-polynomials" class="anchor fas fa-xs fa-link"></a>Addition and Multiplication of <em>polynomials</em></h2>
 <p>I will walk throught these definitions in a very informal manner for brevity. Let’s start by introducing two distinct polynomials.</p>
 <p><span class="math display">\[
@@ -173,9 +173,9 @@ f \cdot g = g \cdot f
 <div class="sourceCode" id="cb6"><pre class="sourceCode hs"><code class="sourceCode haskell"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="ot">=</span> poly [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> g <span class="ot">=</span> poly [<span class="op">-</span><span class="dv">8</span>, <span class="dv">17</span>, <span class="dv">1</span>, <span class="dv">5</span>]</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="op">+</span> g</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">7</span> <span class="op">+</span> 19x <span class="op">+</span> 4x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> 5x<span class="op">^</span><span class="dv">3</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">7</span> <span class="op">+</span> <span class="dv">19</span>x <span class="op">+</span> <span class="dv">4</span>x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">5</span>x<span class="op">^</span><span class="dv">3</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>ghci<span class="op">&gt;</span> f <span class="op">*</span> c</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">8</span> <span class="op">+</span> 1x <span class="op">+</span> 11x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> 58x<span class="op">^</span><span class="dv">3</span> <span class="op">+</span> 13x<span class="op">^</span><span class="dv">4</span> <span class="op">+</span> 15x<span class="op">^</span><span class="dv">5</span></span></code></pre></div>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="op">-</span><span class="dv">8</span> <span class="op">+</span> <span class="dv">1</span>x <span class="op">+</span> <span class="dv">11</span>x<span class="op">^</span><span class="dv">2</span> <span class="op">+</span> <span class="dv">58</span>x<span class="op">^</span><span class="dv">3</span> <span class="op">+</span> <span class="dv">13</span>x<span class="op">^</span><span class="dv">4</span> <span class="op">+</span> <span class="dv">15</span>x<span class="op">^</span><span class="dv">5</span></span></code></pre></div>
 <h2 id="existence-uniqueness"><a href="#existence-uniqueness" class="anchor fas fa-xs fa-link"></a><em>Existence &amp; Uniqueness</em></h2>
 <p>Finally onto the main focus of this post, <em>existence &amp; uniqueness</em> of <em>polynomials</em>.</p>
 <p><strong>Theorem</strong>. <em>For any integer <span class="math inline">\(n \geq 0\)</span> and any list of <span class="math inline">\(n - 1\)</span> points
