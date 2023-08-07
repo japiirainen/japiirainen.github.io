@@ -3,7 +3,7 @@ author: "Joona Piirainen"
 desc: "Verified definition of monoids in agda and exploration of some cool monoids."
 keywords: "agda, monoids, algebra, functional-programming, dependent-types"
 lang: "en"
-title: "Composable and reusable code using monoids"
+title: "Monoids as a tool for writing composable and reusable programs"
 date: "2023-08-05T12:00:00Z"
 ---
 
