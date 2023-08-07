@@ -1,4 +1,4 @@
-my ugly website
+my beautiful website
 
 ## development
 
