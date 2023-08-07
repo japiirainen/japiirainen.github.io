@@ -7,7 +7,7 @@ title: "Monoids as a tool for writing composable and reusable programs"
 date: "2023-08-05T12:00:00Z"
 ---
 
-This time I'll ramble about `monoids`! The reason I like `monoids` is that they they are
+This time I'll ramble about `monoids`! The reason I like `monoids` is that they are
 relatively simple mathemically, but immensly useful in programming. Every programmer has
 used a number of `monoid` structures thruought their careers either knowingly or not. The goal
 of this post is to show that using ideas from mathematics can be useful and even ***practical***.
@@ -50,7 +50,7 @@ variable
 
 If we look at the definition of a `monoid`, we will find that a `monoid` is a
 `semigroup` with an *identity element*. From this it is reasonable to conclude that
-we should first define what is a `semigroup`. Luckily `semigroups` are a very simple
+we should first define what is a `semigroup`. Luckily `semigroups` are a relatively simple
 structure.
 
 ### Semigroup definition
@@ -61,6 +61,22 @@ A semigroup is a *set* $S$ together with a *binary operation* $★$ that satisfi
 $$
 ∀ x y z ∈ S. (x ★ y) ★ z = x ★ (y ★ z)
 $$
+
+To gain some intuition we should try to think of some examples. It can be difficult to gain insight to these often
+quite abstract mathematical ideas without concrete examples. That is why I think it's a great idea to always try to
+come up with some examples when you see one of these definitions. Some examples of `semigroups` from the top of my head
+include the natural numbers with the addition ($+$) operation, or (ℕ,+). Natural numbers with multiplication ($*$) also
+form a `semigroup`. You can veryfy in you head that the following equations hold.
+
+$$
+∀ x y z ∈ ℕ. (x + y) + z = x + (y + z)
+$$
+$$
+∀ x y z ∈ ℕ. (x * y) * z = x * (y * z)
+$$
+
+Other examples include (String,++) where `++` is string concatenation, (List, ++) where `++` is list concatenation,
+(Bool,∨) where `∨` means *or* and (Bool,∧) where `∧` means *and*.
 
 Lets encode this in `agda`. The beautiful thing about `agda` is that the encoding is pretty much *1:1* to the math above.
 
@@ -113,6 +129,9 @@ $$
 $$
 ∃ e ∈ S. ∀ x. e ★ a = a ★ e = a
 $$
+
+I again encourage you to think of examples, like we did after the `semigrou` definition.
+Do you think the examples I gave of `semigroups` are also `monoids`?
 
 Again, it is straight forward to translate this to `agda`.
 
@@ -215,7 +234,7 @@ _ : any? (11 ≤ᵇ_) (11 ∷ numbers) ≡ true
 _ = refl
 ```
 
-Pretty neat? I think so! We can do a bunch of other cool things too, we can for example
+Pretty neat? I think so! We can do other cool things too, we can for example
 flatten nested lists.
 
 ```agda
