@@ -22,7 +22,7 @@ see the *standard-library* module `Data.Nat.Properties`. It is common for an `Ag
 this one is no exception :-).
 
 ```agda
-{-# OPTIONS --safe --guardedness --cubical-compatible #-}
+{-# OPTIONS --safe --guardedness #-}
 module Monoids where
 
 open import Level renaming (suc to lsuc)
@@ -42,7 +42,7 @@ In practice a `variable` block let's you omit a bunch of detail from definitions
 use the variables defined in the `variable` block. I think this will make since once you see it in action.
 
 ```agda
-variable
+private variable
   ℓ ℓ₂ : Level
   A : Set ℓ
   B : Set ℓ₂
