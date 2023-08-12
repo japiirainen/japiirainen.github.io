@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Monoid homomorphisms</title>
+    <title>Monoid Homomorphisms</title>
 
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="TODO" />
+    <meta name="description" content="Exploring structure-preserving maps between monoids." />
     
     <meta name="author" content="Joona Piirainen" />
      
@@ -13,17 +13,17 @@
     
 
     <meta property="og:site_name" content="japiirainen" />
-    <meta property="og:title" content="Monoid homomorphisms" />
+    <meta property="og:title" content="Monoid Homomorphisms" />
     <meta property="og:url" content="https://japiirainen.xyz/posts/MonoidHomomorphisms.html" />
-    <meta property="og:description" content="TODO" />
+    <meta property="og:description" content="Exploring structure-preserving maps between monoids." />
      
     <meta property="og:type" content="article" />
     
 
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:site" content="japiirainen" />
-    <meta property="twitter:title" content="Monoid homomorphisms" />
-    <meta property="twitter:description" content="TODO" />
+    <meta property="twitter:title" content="Monoid Homomorphisms" />
+    <meta property="twitter:description" content="Exploring structure-preserving maps between monoids." />
      
 
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -44,64 +44,91 @@
         <a href="/">&#8592</a>
       </h2>
       <h1>
-        <a href="/posts/MonoidHomomorphisms.html">Monoid homomorphisms</a>
+        <a href="/posts/MonoidHomomorphisms.html">Monoid Homomorphisms</a>
       </h1>
       <div>
         <small>2023-08-07</small>
         
       </div>
+      <div>
+        
+        <small>agda, monoids, algebra, functional-programming, dependent-types, monoid-homomorphisms</small>
+        
+      </div>
     </header>
-    <section><pre class="Agda"><a id="225" class="Symbol">{-#</a> <a id="229" class="Keyword">OPTIONS</a> <a id="237" class="Pragma">--safe</a> <a id="244" class="Pragma">--guardedness</a> <a id="258" class="Symbol">#-}</a>
-<a id="262" class="Keyword">module</a> <a id="269" href="MonoidHomomorphisms.html" class="Module">MonoidHomomorphisms</a> <a id="289" class="Keyword">where</a>
+    <section><p>In the <a href="./Monoids.html">previous</a> had a brief exploration in the land of <code>monoids</code>. Today I would like to continue from where we left off.</p>
+<p>Previously we defined the meaning of a <code>monoid</code> and saw a bunch of examples. Now we will consider how monoids interact with each other,
+or weather they do at all? In particular we are interested in finding these things mathematicians like to call <em>homomorphisms</em> or
+<em>structure-preserving maps</em>. Basically these are just <em>maps</em> between some algebraic structure such as a <code>monoid</code> or a <code>vector space</code>
+that behave <em>nicely</em>. We will soon see what exactly <em>nicely</em> means in the context of <code>monoid homomorphisms</code>.</p>
+<p>Let’s get the usual <code>Agda</code> boilerplate out of our way.</p>
+<pre class="Agda"><a id="978" class="Symbol">{-#</a> <a id="982" class="Keyword">OPTIONS</a> <a id="990" class="Pragma">--safe</a> <a id="997" class="Pragma">--guardedness</a> <a id="1011" class="Symbol">#-}</a>
+<a id="1015" class="Keyword">module</a> <a id="1022" href="MonoidHomomorphisms.html" class="Module">MonoidHomomorphisms</a> <a id="1042" class="Keyword">where</a>
 
-<a id="296" class="Keyword">open</a> <a id="301" class="Keyword">import</a> <a id="308" href="Level.html" class="Module">Level</a>
-<a id="314" class="Keyword">open</a> <a id="319" class="Keyword">import</a> <a id="326" href="Data.List.html" class="Module">Data.List</a> <a id="336" class="Symbol">as</a> <a id="339" class="Module">List</a>
-<a id="344" class="Keyword">open</a> <a id="349" class="Keyword">import</a> <a id="356" href="Relation.Binary.PropositionalEquality.html" class="Module">Relation.Binary.PropositionalEquality</a> <a id="394" class="Keyword">using</a> <a id="400" class="Symbol">(</a><a id="401" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a><a id="405" class="Symbol">;</a> <a id="407" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">_≡_</a><a id="410" class="Symbol">)</a>
+<a id="1049" class="Keyword">open</a> <a id="1054" class="Keyword">import</a> <a id="1061" href="Level.html" class="Module">Level</a>
+<a id="1067" class="Keyword">open</a> <a id="1072" class="Keyword">import</a> <a id="1079" href="Data.List.html" class="Module">Data.List</a> <a id="1089" class="Symbol">as</a> <a id="1092" class="Module">List</a>
+<a id="1097" class="Keyword">open</a> <a id="1102" class="Keyword">import</a> <a id="1109" href="Relation.Binary.PropositionalEquality.html" class="Module">Relation.Binary.PropositionalEquality</a> <a id="1147" class="Keyword">using</a> <a id="1153" class="Symbol">(</a><a id="1154" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a><a id="1158" class="Symbol">;</a> <a id="1160" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">_≡_</a><a id="1163" class="Symbol">)</a>
 
-<a id="413" class="Keyword">open</a> <a id="418" class="Keyword">import</a> <a id="425" href="Monoids.html" class="Module">Monoids</a>
+<a id="1166" class="Comment">-- from previous post</a>
+<a id="1188" class="Keyword">open</a> <a id="1193" class="Keyword">import</a> <a id="1200" href="Monoids.html" class="Module">Monoids</a>
 
-<a id="434" class="Keyword">private</a> <a id="442" class="Keyword">variable</a>
-  <a id="453" href="MonoidHomomorphisms.html#453" class="Generalizable">ℓ</a> <a id="455" class="Symbol">:</a> <a id="457" href="Agda.Primitive.html#591" class="Postulate">Level</a>
-  <a id="465" href="MonoidHomomorphisms.html#465" class="Generalizable">A</a> <a id="467" class="Symbol">:</a> <a id="469" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="473" href="MonoidHomomorphisms.html#453" class="Generalizable">ℓ</a>
+<a id="1209" class="Keyword">private</a> <a id="1217" class="Keyword">variable</a>
+  <a id="1228" href="MonoidHomomorphisms.html#1228" class="Generalizable">ℓ</a> <a id="1230" class="Symbol">:</a> <a id="1232" href="Agda.Primitive.html#591" class="Postulate">Level</a>
+  <a id="1240" href="MonoidHomomorphisms.html#1240" class="Generalizable">A</a> <a id="1242" class="Symbol">:</a> <a id="1244" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1248" href="MonoidHomomorphisms.html#1228" class="Generalizable">ℓ</a>
 </pre>
-<p>This post is in a WIP state</p>
-<h4 id="definition"><a href="#definition" class="anchor fas fa-xs fa-link"></a>Definition</h4>
+<p>Now we must define what exactly it means for a <em>map</em> between two <code>monoids</code> to behave <em>nicely</em>.</p>
+<h3 id="definition"><a href="#definition" class="anchor fas fa-xs fa-link"></a>Definition</h3>
 <p>A homomorphisms between two monoids <span class="math inline">\((F,★)\)</span> and <span class="math inline">\((T,∙)\)</span> is a function <span class="math inline">\(f : F \rightarrow T\)</span>
 such that the following properties hold:</p>
 <p><span class="math display">\[
 f(ε_{F}) = ε_{T}
-\]</span>
-<span class="math display">\[
-∀ x y ∈ F. f(x ★ y) = f(x) ∙ f(y)
+\]</span></p>
+<p><span class="math display">\[
+\forall x y ∈ F. f(x ★ y) = f(x) ∙ f(y)
 \]</span></p>
 <p>where <span class="math inline">\(ε_{F}\)</span> and <span class="math inline">\(ε_{T}\)</span> are the identity elements of <span class="math inline">\(T\)</span> and <span class="math inline">\(F\)</span> respectively.</p>
-<pre class="Agda"><a id="814" class="Keyword">record</a> <a id="Monoid-Hom"></a><a id="821" href="MonoidHomomorphisms.html#821" class="Record">Monoid-Hom</a> 
-       <a id="840" class="Symbol">{</a><a id="841" href="MonoidHomomorphisms.html#841" class="Bound">ℓ₁</a> <a id="844" href="MonoidHomomorphisms.html#844" class="Bound">ℓ₂</a> <a id="847" class="Symbol">:</a> <a id="849" href="Agda.Primitive.html#591" class="Postulate">Level</a><a id="854" class="Symbol">}</a> <a id="856" class="Symbol">{</a><a id="857" href="MonoidHomomorphisms.html#857" class="Bound">F</a> <a id="859" class="Symbol">:</a> <a id="861" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="865" href="MonoidHomomorphisms.html#841" class="Bound">ℓ₁</a><a id="867" class="Symbol">}</a> <a id="869" class="Symbol">{</a><a id="870" href="MonoidHomomorphisms.html#870" class="Bound">T</a> <a id="872" class="Symbol">:</a> <a id="874" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="878" href="MonoidHomomorphisms.html#844" class="Bound">ℓ₂</a><a id="880" class="Symbol">}</a>
-       <a id="889" class="Symbol">(</a><a id="890" href="MonoidHomomorphisms.html#890" class="Bound">a</a> <a id="892" class="Symbol">:</a> <a id="894" href="Monoids.html#5602" class="Record">Monoid</a> <a id="901" href="MonoidHomomorphisms.html#857" class="Bound">F</a><a id="902" class="Symbol">)</a> <a id="904" class="Symbol">(</a><a id="905" href="MonoidHomomorphisms.html#905" class="Bound">b</a> <a id="907" class="Symbol">:</a> <a id="909" href="Monoids.html#5602" class="Record">Monoid</a> <a id="916" href="MonoidHomomorphisms.html#870" class="Bound">T</a><a id="917" class="Symbol">)</a> <a id="919" class="Symbol">(</a><a id="920" href="MonoidHomomorphisms.html#920" class="Bound">f</a> <a id="922" class="Symbol">:</a> <a id="924" href="MonoidHomomorphisms.html#857" class="Bound">F</a> <a id="926" class="Symbol">→</a> <a id="928" href="MonoidHomomorphisms.html#870" class="Bound">T</a><a id="929" class="Symbol">)</a> <a id="931" class="Symbol">:</a> <a id="933" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="937" class="Symbol">(</a><a id="938" href="MonoidHomomorphisms.html#841" class="Bound">ℓ₁</a> <a id="941" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="943" href="MonoidHomomorphisms.html#844" class="Bound">ℓ₂</a><a id="945" class="Symbol">)</a> <a id="947" class="Keyword">where</a>
-  <a id="955" class="Keyword">private</a>
-    <a id="967" class="Keyword">module</a> <a id="Monoid-Hom.From"></a><a id="974" href="MonoidHomomorphisms.html#974" class="Module">From</a> <a id="979" class="Symbol">=</a> <a id="981" href="Monoids.html#5602" class="Module">Monoid</a> <a id="988" href="MonoidHomomorphisms.html#890" class="Bound">a</a>
-    <a id="994" class="Keyword">module</a> <a id="Monoid-Hom.To"></a><a id="1001" href="MonoidHomomorphisms.html#1001" class="Module">To</a> <a id="1004" class="Symbol">=</a> <a id="1006" href="Monoids.html#5602" class="Module">Monoid</a> <a id="1013" href="MonoidHomomorphisms.html#905" class="Bound">b</a>
+<p>The first property says that the function <span class="math inline">\(f\)</span> should <em>preserve</em> identities. The second one says that
+it doesn’t matter in which order you apply the function <span class="math inline">\(f\)</span> related to the <em>multiplication</em> of the <code>monoids</code>.</p>
+<p>Now we can encode this structure in <code>Agda</code>.</p>
+<pre class="Agda"><a id="1919" class="Keyword">record</a> <a id="Monoid-Hom"></a><a id="1926" href="MonoidHomomorphisms.html#1926" class="Record">Monoid-Hom</a> 
+       <a id="1945" class="Symbol">{</a><a id="1946" href="MonoidHomomorphisms.html#1946" class="Bound">ℓ₁</a> <a id="1949" href="MonoidHomomorphisms.html#1949" class="Bound">ℓ₂</a> <a id="1952" class="Symbol">:</a> <a id="1954" href="Agda.Primitive.html#591" class="Postulate">Level</a><a id="1959" class="Symbol">}</a> <a id="1961" class="Symbol">{</a><a id="1962" href="MonoidHomomorphisms.html#1962" class="Bound">F</a> <a id="1964" class="Symbol">:</a> <a id="1966" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1970" href="MonoidHomomorphisms.html#1946" class="Bound">ℓ₁</a><a id="1972" class="Symbol">}</a> <a id="1974" class="Symbol">{</a><a id="1975" href="MonoidHomomorphisms.html#1975" class="Bound">T</a> <a id="1977" class="Symbol">:</a> <a id="1979" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="1983" href="MonoidHomomorphisms.html#1949" class="Bound">ℓ₂</a><a id="1985" class="Symbol">}</a>
+       <a id="1994" class="Symbol">(</a><a id="1995" href="MonoidHomomorphisms.html#1995" class="Bound">a</a> <a id="1997" class="Symbol">:</a> <a id="1999" href="Monoids.html#5602" class="Record">Monoid</a> <a id="2006" href="MonoidHomomorphisms.html#1962" class="Bound">F</a><a id="2007" class="Symbol">)</a> <a id="2009" class="Symbol">(</a><a id="2010" href="MonoidHomomorphisms.html#2010" class="Bound">b</a> <a id="2012" class="Symbol">:</a> <a id="2014" href="Monoids.html#5602" class="Record">Monoid</a> <a id="2021" href="MonoidHomomorphisms.html#1975" class="Bound">T</a><a id="2022" class="Symbol">)</a> <a id="2024" class="Symbol">(</a><a id="2025" href="MonoidHomomorphisms.html#2025" class="Bound">f</a> <a id="2027" class="Symbol">:</a> <a id="2029" href="MonoidHomomorphisms.html#1962" class="Bound">F</a> <a id="2031" class="Symbol">→</a> <a id="2033" href="MonoidHomomorphisms.html#1975" class="Bound">T</a><a id="2034" class="Symbol">)</a> <a id="2036" class="Symbol">:</a> <a id="2038" href="Agda.Primitive.html#320" class="Primitive">Set</a> <a id="2042" class="Symbol">(</a><a id="2043" href="MonoidHomomorphisms.html#1946" class="Bound">ℓ₁</a> <a id="2046" href="Agda.Primitive.html#804" class="Primitive Operator">⊔</a> <a id="2048" href="MonoidHomomorphisms.html#1949" class="Bound">ℓ₂</a><a id="2050" class="Symbol">)</a> <a id="2052" class="Keyword">where</a>
+  <a id="2060" class="Keyword">private</a>
+    <a id="2072" class="Keyword">module</a> <a id="Monoid-Hom.From"></a><a id="2079" href="MonoidHomomorphisms.html#2079" class="Module">From</a> <a id="2084" class="Symbol">=</a> <a id="2086" href="Monoids.html#5602" class="Module">Monoid</a> <a id="2093" href="MonoidHomomorphisms.html#1995" class="Bound">a</a>
+    <a id="2099" class="Keyword">module</a> <a id="Monoid-Hom.To"></a><a id="2106" href="MonoidHomomorphisms.html#2106" class="Module">To</a> <a id="2109" class="Symbol">=</a> <a id="2111" href="Monoids.html#5602" class="Module">Monoid</a> <a id="2118" href="MonoidHomomorphisms.html#2010" class="Bound">b</a>
 
-  <a id="1018" class="Keyword">field</a>
-    <a id="Monoid-Hom.ε-homo"></a><a id="1028" href="MonoidHomomorphisms.html#1028" class="Field">ε-homo</a> <a id="1035" class="Symbol">:</a> <a id="1037" href="MonoidHomomorphisms.html#920" class="Bound">f</a> <a id="1039" href="Monoids.html#5662" class="Function">From.ε</a> <a id="1046" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="1048" href="Monoids.html#5662" class="Function">To.ε</a>
-    <a id="Monoid-Hom.★-homo"></a><a id="1057" href="MonoidHomomorphisms.html#1057" class="Field">★-homo</a> <a id="1064" class="Symbol">:</a> <a id="1066" class="Symbol">∀</a> <a id="1068" class="Symbol">(</a><a id="1069" href="MonoidHomomorphisms.html#1069" class="Bound">x</a> <a id="1071" href="MonoidHomomorphisms.html#1071" class="Bound">y</a> <a id="1073" class="Symbol">:</a> <a id="1075" href="MonoidHomomorphisms.html#857" class="Bound">F</a><a id="1076" class="Symbol">)</a> <a id="1078" class="Symbol">→</a> <a id="1080" href="MonoidHomomorphisms.html#920" class="Bound">f</a> <a id="1082" class="Symbol">(</a><a id="1083" href="MonoidHomomorphisms.html#1069" class="Bound">x</a> <a id="1085" href="Monoids.html#5672" class="Function Operator">From.★</a> <a id="1092" href="MonoidHomomorphisms.html#1071" class="Bound">y</a><a id="1093" class="Symbol">)</a> <a id="1095" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="1097" href="MonoidHomomorphisms.html#920" class="Bound">f</a> <a id="1099" href="MonoidHomomorphisms.html#1069" class="Bound">x</a> <a id="1101" href="Monoids.html#5672" class="Function Operator">To.★</a> <a id="1106" href="MonoidHomomorphisms.html#920" class="Bound">f</a> <a id="1108" href="MonoidHomomorphisms.html#1071" class="Bound">y</a>
+  <a id="2123" class="Keyword">field</a>
+    <a id="Monoid-Hom.ε-homo"></a><a id="2133" href="MonoidHomomorphisms.html#2133" class="Field">ε-homo</a> <a id="2140" class="Symbol">:</a> <a id="2142" href="MonoidHomomorphisms.html#2025" class="Bound">f</a> <a id="2144" href="Monoids.html#5662" class="Function">From.ε</a> <a id="2151" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="2153" href="Monoids.html#5662" class="Function">To.ε</a>
+    <a id="Monoid-Hom.★-homo"></a><a id="2162" href="MonoidHomomorphisms.html#2162" class="Field">★-homo</a> <a id="2169" class="Symbol">:</a> <a id="2171" class="Symbol">∀</a> <a id="2173" class="Symbol">(</a><a id="2174" href="MonoidHomomorphisms.html#2174" class="Bound">x</a> <a id="2176" href="MonoidHomomorphisms.html#2176" class="Bound">y</a> <a id="2178" class="Symbol">:</a> <a id="2180" href="MonoidHomomorphisms.html#1962" class="Bound">F</a><a id="2181" class="Symbol">)</a> <a id="2183" class="Symbol">→</a> <a id="2185" href="MonoidHomomorphisms.html#2025" class="Bound">f</a> <a id="2187" class="Symbol">(</a><a id="2188" href="MonoidHomomorphisms.html#2174" class="Bound">x</a> <a id="2190" href="Monoids.html#5672" class="Function Operator">From.★</a> <a id="2197" href="MonoidHomomorphisms.html#2176" class="Bound">y</a><a id="2198" class="Symbol">)</a> <a id="2200" href="Agda.Builtin.Equality.html#133" class="Datatype Operator">≡</a> <a id="2202" href="MonoidHomomorphisms.html#2025" class="Bound">f</a> <a id="2204" href="MonoidHomomorphisms.html#2174" class="Bound">x</a> <a id="2206" href="Monoids.html#5672" class="Function Operator">To.★</a> <a id="2211" href="MonoidHomomorphisms.html#2025" class="Bound">f</a> <a id="2213" href="MonoidHomomorphisms.html#2176" class="Bound">y</a>
 
-<a id="1111" class="Keyword">open</a> <a id="1116" href="MonoidHomomorphisms.html#821" class="Module">Monoid-Hom</a>
+<a id="2216" class="Keyword">open</a> <a id="2221" href="MonoidHomomorphisms.html#1926" class="Module">Monoid-Hom</a>
 </pre>
-<p>want: combined length of all lists.</p>
-<p>[1,2,3] , [4,5,6] , [7,8,9]</p>
-<p>2 choices:</p>
+<h3 id="example"><a href="#example" class="anchor fas fa-xs fa-link"></a>Example</h3>
+<p>Suppose you need to write a program to find the total <code>count</code> of elements from a large collection of <code>lists</code>.</p>
+<p>E.g. find the total count of elements from the following lists.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] , [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>] , [<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>] , [<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>] , ...</span></code></pre></div>
+<p>I can think of two different approaches to this problem:</p>
 <ol type="1">
-<li>combine lists and take length</li>
-<li>take length of each and then combine results</li>
+<li>Combine all lists to a single list and take count of this list.</li>
+<li>Take the count of each list and the sum these counts together.</li>
 </ol>
-<p>2 is much faster sine list concatenation <em>++</em> runs in <span class="math inline">\(O(n)\)</span> time. We be sure that these choices are equivalent exactly
-because length is a <em>monoid homomorphisms</em> between <code>[]-monoid</code> and <code>+-0</code>!</p>
-<pre class="Agda"><a id="length-homo"></a><a id="1495" href="MonoidHomomorphisms.html#1495" class="Function">length-homo</a> <a id="1507" class="Symbol">:</a> <a id="1509" href="MonoidHomomorphisms.html#821" class="Record">Monoid-Hom</a> <a id="1520" class="Symbol">(</a><a id="1521" href="Monoids.html#8422" class="Function">[]-monoid</a> <a id="1531" class="Symbol">{</a><a id="1532" class="Argument">A</a> <a id="1534" class="Symbol">=</a> <a id="1536" href="MonoidHomomorphisms.html#465" class="Generalizable">A</a><a id="1537" class="Symbol">})</a> <a id="1540" href="Monoids.html#9152" class="Function">+-0</a> <a id="1544" href="Data.List.Base.html#5072" class="Function">List.length</a>
-<a id="1556" href="MonoidHomomorphisms.html#1028" class="Field">ε-homo</a> <a id="1563" href="MonoidHomomorphisms.html#1495" class="Function">length-homo</a> <a id="1575" class="Symbol">=</a> <a id="1577" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
-<a id="1582" href="MonoidHomomorphisms.html#1057" class="Field">★-homo</a> <a id="1589" href="MonoidHomomorphisms.html#1495" class="Function">length-homo</a> <a id="1601" href="Agda.Builtin.List.html#167" class="InductiveConstructor">[]</a> <a id="1604" href="MonoidHomomorphisms.html#1604" class="Bound">y</a> <a id="1606" class="Symbol">=</a> <a id="1608" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
-<a id="1613" href="MonoidHomomorphisms.html#1057" class="Field">★-homo</a> <a id="1620" href="MonoidHomomorphisms.html#1495" class="Function">length-homo</a> <a id="1632" class="Symbol">(</a><a id="1633" href="MonoidHomomorphisms.html#1633" class="Bound">x</a> <a id="1635" href="Agda.Builtin.List.html#182" class="InductiveConstructor Operator">∷</a> <a id="1637" href="MonoidHomomorphisms.html#1637" class="Bound">xs</a><a id="1639" class="Symbol">)</a> <a id="1641" href="MonoidHomomorphisms.html#1641" class="Bound">y</a> <a id="1643" class="Keyword">rewrite</a> <a id="1651" href="MonoidHomomorphisms.html#1057" class="Field">★-homo</a> <a id="1658" href="MonoidHomomorphisms.html#1495" class="Function">length-homo</a> <a id="1670" href="MonoidHomomorphisms.html#1637" class="Bound">xs</a> <a id="1673" href="MonoidHomomorphisms.html#1641" class="Bound">y</a> <a id="1675" class="Symbol">=</a> <a id="1677" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
-</pre></section>
+<p>These approaches <em>should</em> lead to the same result, but are computationally quite different.
+One of these approaches starts to sound a lot nicer once you realize that list concatenation runs
+in <em>linear</em> <span class="math inline">\(O(n)\)</span> time. This would lead to a <em>quadratic</em> algorithm since we would be concatenating
+a linear number of lists! After this realization we conclude we should first find the counts of all
+the lists and the add these counts together. But how can we be sure we will end up with the same result?
+After all these two algorithms are very dirrefent computationally. Well it turns out that we can be sure
+that these algorithm choices are equivalent because <code>length</code> is a <code>monoid homomorphisms</code> between <code>[]-monoid</code> and <code>+-0</code>!</p>
+<pre class="Agda"><a id="length-homo"></a><a id="3409" href="MonoidHomomorphisms.html#3409" class="Function">length-homo</a> <a id="3421" class="Symbol">:</a> <a id="3423" href="MonoidHomomorphisms.html#1926" class="Record">Monoid-Hom</a> <a id="3434" class="Symbol">(</a><a id="3435" href="Monoids.html#8486" class="Function">[]-monoid</a> <a id="3445" class="Symbol">{</a><a id="3446" class="Argument">A</a> <a id="3448" class="Symbol">=</a> <a id="3450" href="MonoidHomomorphisms.html#1240" class="Generalizable">A</a><a id="3451" class="Symbol">})</a> <a id="3454" href="Monoids.html#9209" class="Function">+-0</a> <a id="3458" href="Data.List.Base.html#5072" class="Function">List.length</a>
+<a id="3470" href="MonoidHomomorphisms.html#2133" class="Field">ε-homo</a> <a id="3477" href="MonoidHomomorphisms.html#3409" class="Function">length-homo</a> <a id="3489" class="Symbol">=</a> <a id="3491" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
+<a id="3496" href="MonoidHomomorphisms.html#2162" class="Field">★-homo</a> <a id="3503" href="MonoidHomomorphisms.html#3409" class="Function">length-homo</a> <a id="3515" href="Agda.Builtin.List.html#167" class="InductiveConstructor">[]</a> <a id="3518" href="MonoidHomomorphisms.html#3518" class="Bound">y</a> <a id="3520" class="Symbol">=</a> <a id="3522" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
+<a id="3527" href="MonoidHomomorphisms.html#2162" class="Field">★-homo</a> <a id="3534" href="MonoidHomomorphisms.html#3409" class="Function">length-homo</a> <a id="3546" class="Symbol">(</a><a id="3547" href="MonoidHomomorphisms.html#3547" class="Bound">x</a> <a id="3549" href="Agda.Builtin.List.html#182" class="InductiveConstructor Operator">∷</a> <a id="3551" href="MonoidHomomorphisms.html#3551" class="Bound">xs</a><a id="3553" class="Symbol">)</a> <a id="3555" href="MonoidHomomorphisms.html#3555" class="Bound">y</a> <a id="3557" class="Keyword">rewrite</a> <a id="3565" href="MonoidHomomorphisms.html#2162" class="Field">★-homo</a> <a id="3572" href="MonoidHomomorphisms.html#3409" class="Function">length-homo</a> <a id="3584" href="MonoidHomomorphisms.html#3551" class="Bound">xs</a> <a id="3587" href="MonoidHomomorphisms.html#3555" class="Bound">y</a> <a id="3589" class="Symbol">=</a> <a id="3591" href="Agda.Builtin.Equality.html#190" class="InductiveConstructor">refl</a>
+</pre>
+<p>This example showed how one can use <code>monoid homomorphisms</code> as a way to find equivalent ways to
+perform a computation. This is important because in many cases these different ways can drastically
+differ in their <em>time and space complexities</em>.</p>
+<p>This is all I had in mind for today, I hope you found <code>monoid homomorphisms</code> interesting or even <strong><em>useful</em></strong>.</p>
+<p>Thanks for reading and see you next time!</p></section>
   </article>
 </main>
 

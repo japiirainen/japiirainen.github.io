@@ -159,21 +159,26 @@ record Monoid (A : Set ℓ) : Set ℓ where
 We can show that `∧` and `∨` are `monoids`!
 
 ```agda
-∧-monoid : Monoid Bool
-∧-monoid = record { ε = true 
-                  ; _★_ = _∧_ 
-                  ; has-is-monoid = 
-                    record { has-is-semigroup = Semigroup.has-is-semigroup ∧-semigroup
-                           ; identityˡ = ∧-identityˡ
-                           ; identityʳ = ∧-identityʳ } }
+module _ where
 
-∨-monoid : Monoid Bool
-Monoid.ε ∨-monoid = false
-Monoid._★_ ∨-monoid = _∨_
-is-monoid.has-is-semigroup (Monoid.has-is-monoid ∨-monoid) =
-  Semigroup.has-is-semigroup ∨-semigroup
-is-monoid.identityˡ (Monoid.has-is-monoid ∨-monoid) = ∨-identityˡ
-is-monoid.identityʳ (Monoid.has-is-monoid ∨-monoid) = ∨-identityʳ
+  open is-monoid
+  open Semigroup
+  open Monoid
+
+  ∧-monoid : Monoid Bool
+  ∧-monoid = record { ε = true 
+                    ; _★_ = _∧_ 
+                    ; has-is-monoid = 
+                      record { has-is-semigroup = has-is-semigroup ∧-semigroup
+                             ; identityˡ = ∧-identityˡ
+                             ; identityʳ = ∧-identityʳ } }
+
+  ∨-monoid : Monoid Bool
+  ε ∨-monoid = false
+  _★_ ∨-monoid = _∨_
+  has-is-semigroup (has-is-monoid ∨-monoid) = has-is-semigroup ∨-semigroup
+  identityˡ (has-is-monoid ∨-monoid) = ∨-identityˡ
+  identityʳ (has-is-monoid ∨-monoid) = ∨-identityʳ
 ```
 
 I'm using proofs such as `∨-identityʳ` from the `standard-library` to keep the length of
@@ -238,17 +243,23 @@ Pretty neat? I think so! We can do other cool things too, we can for example
 flatten nested lists.
 
 ```agda
-[]-semigroup : Semigroup (List A)
-Semigroup._★_ []-semigroup = _++_
-is-semigroup.assoc (Semigroup.has-is-semigroup []-semigroup) = ++-assoc
+module _ where
 
-[]-monoid : Monoid (List A)
-Monoid.ε []-monoid = []
-Monoid._★_ []-monoid = _++_
-is-monoid.has-is-semigroup (Monoid.has-is-monoid []-monoid) =
-  Semigroup.has-is-semigroup []-semigroup
-is-monoid.identityˡ (Monoid.has-is-monoid []-monoid) = ++-identityˡ
-is-monoid.identityʳ (Monoid.has-is-monoid []-monoid) = ++-identityʳ
+  open is-semigroup
+  open is-monoid
+  open Semigroup
+  open Monoid
+
+  []-semigroup : Semigroup (List A)
+  _★_ []-semigroup = _++_
+  assoc (has-is-semigroup []-semigroup) = ++-assoc
+
+  []-monoid : Monoid (List A)
+  ε []-monoid = []
+  _★_ []-monoid = _++_
+  has-is-semigroup (has-is-monoid []-monoid) = has-is-semigroup []-semigroup
+  identityˡ (has-is-monoid []-monoid) = ++-identityˡ
+  identityʳ (has-is-monoid []-monoid) = ++-identityʳ
 
 module _ where
   instance _ = []-monoid
@@ -263,27 +274,34 @@ _ = refl
 Or take sums and products. Excuse the mostly boring `semigroup` and `monoid` instance declarations.
 
 ```agda
-+-semi : Semigroup ℕ
-Semigroup._★_ +-semi = _+_
-is-semigroup.assoc (Semigroup.has-is-semigroup +-semi) = +-assoc
+module _ where
 
-+-0 : Monoid ℕ
-Monoid.ε +-0 = 0
-Monoid._★_ +-0 = _+_
-is-monoid.has-is-semigroup (Monoid.has-is-monoid +-0) = Semigroup.has-is-semigroup +-semi
-is-monoid.identityˡ (Monoid.has-is-monoid +-0) = +-identityˡ
-is-monoid.identityʳ (Monoid.has-is-monoid +-0) = +-identityʳ
+  open is-semigroup
+  open is-monoid
+  open Semigroup
+  open Monoid
 
-*-semi : Semigroup ℕ
-Semigroup._★_ *-semi = _*_
-is-semigroup.assoc (Semigroup.has-is-semigroup *-semi) = *-assoc
+  +-semi : Semigroup ℕ
+  _★_ +-semi = _+_
+  assoc (has-is-semigroup +-semi) = +-assoc
 
-*-1 : Monoid ℕ
-Monoid.ε *-1 = 1
-Monoid._★_ *-1 = _*_
-is-monoid.has-is-semigroup (Monoid.has-is-monoid *-1) = Semigroup.has-is-semigroup *-semi
-is-monoid.identityˡ (Monoid.has-is-monoid *-1) = *-identityˡ
-is-monoid.identityʳ (Monoid.has-is-monoid *-1) = *-identityʳ
+  +-0 : Monoid ℕ
+  ε +-0 = 0
+  _★_ +-0 = _+_
+  has-is-semigroup (has-is-monoid +-0) = has-is-semigroup +-semi
+  identityˡ (has-is-monoid +-0) = +-identityˡ
+  identityʳ (has-is-monoid +-0) = +-identityʳ
+
+  *-semi : Semigroup ℕ
+  _★_ *-semi = _*_
+  assoc (has-is-semigroup *-semi) = *-assoc
+
+  *-1 : Monoid ℕ
+  ε *-1 = 1
+  _★_ *-1 = _*_
+  has-is-semigroup (has-is-monoid *-1) = has-is-semigroup *-semi
+  identityˡ (has-is-monoid *-1) = *-identityˡ
+  identityʳ (has-is-monoid *-1) = *-identityʳ
 
 module _ where
   instance _ = +-0
@@ -312,10 +330,10 @@ module _ (mon : Monoid A) where
   dual : Monoid A
   Monoid.ε dual = ε
   Monoid._★_ dual = flip _★_
-  is-semigroup.assoc (is-monoid.has-is-semigroup (Monoid.has-is-monoid dual))
+  is-semigroup.assoc (is-monoid.has-is-semigroup (has-is-monoid dual))
     x y z = sym (assoc z y x)
-  is-monoid.identityˡ (Monoid.has-is-monoid dual) = identityʳ
-  is-monoid.identityʳ (Monoid.has-is-monoid dual) = identityˡ
+  is-monoid.identityˡ (has-is-monoid dual) = identityʳ
+  is-monoid.identityʳ (has-is-monoid dual) = identityˡ
 
 reverse : List A → List A
 reverse = foldMapList ⦃ dual ([]-monoid) ⦄ (_∷ [])
