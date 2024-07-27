@@ -7,6 +7,20 @@
   </url>
 
   <url>
+    <loc>https://japiirainen.xyz/posts/staying-sane-with-python-and-typescript.html</loc>
+    <lastmod>2024-07-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html</loc>
+    <lastmod>2024-07-26</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
     <loc>https://japiirainen.xyz/posts/MonoidHomomorphisms.html</loc>
     <lastmod>2023-08-07</lastmod>
     <changefreq>weekly</changefreq>

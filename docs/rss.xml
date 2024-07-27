@@ -7,8 +7,324 @@
         <description><![CDATA[My personal website + blog]]></description>
         <atom:link href="https://japiirainen.xyz/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sun, 11 Jun 2023 12:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sat, 27 Jul 2024 11:50:00 UT</lastBuildDate>
         <item>
+    <title>Staying sane while working with python and typescript</title>
+    <link>https://japiirainen.xyz/posts/staying-sane-with-python-and-typescript.html</link>
+    <description><![CDATA[<main>
+  <article>
+    <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
+      <h1>
+        <a href="/posts/staying-sane-with-python-and-typescript.html">Staying sane while working with python and typescript</a>
+      </h1>
+      <div>
+        <small>2024-07-27</small>
+        
+      </div>
+      <div>
+        
+        <small>types, programming-languages, typescript, python, haskell, agda, lean4</small>
+        
+      </div>
+    </header>
+    <section><p>In this article I’ll share my personal tips for keeping your sanity when working with python and
+typescript. These stem from having worked with languages with expressive type systems,
+such as <a href="https://www.haskell.org/">haskell</a>, <a href="https://github.com/agda/agda">agda</a> and <a href="https://github.com/leanprover/lean4">lean4</a>.
+Unfortinutely I don’t get to work with these languages daily, and for now
+I’ll have to cope with more mainstream languages like python and typescript. Nevertheless,
+I have found ways to combat common issues you run into when working with these languages.</p>
+<h2 id="python"><a href="#python" class="anchor fas fa-xs fa-link"></a>Python</h2>
+<h3 id="use-pyright-mypy-or-some-static-type-checker"><a href="#use-pyright-mypy-or-some-static-type-checker" class="anchor fas fa-xs fa-link"></a>1. Use pyright, mypy or some static type checker</h3>
+<p>See my <a href="https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html">post</a> on “dynamic” languages.</p>
+<h3 id="avoid-dictionaries"><a href="#avoid-dictionaries" class="anchor fas fa-xs fa-link"></a>2. Avoid dictionaries</h3>
+<p>Avoid dictionaries at all cost and use <code>dataclass</code> or <code>pydantic</code> instead.
+In general, the only place dictionaries are actually needed are as implementation details of library functions/algorithms. They should
+almost never be passed in or out of your libraries public API. The reason for avoiding
+dictionaries is that they are so weakly typed that the type system won’t be able to
+help you nearly as much as when using stricter types. You will notice the benefits
+especially when performing large scale refactorings.</p>
+<p>Don’t write functions like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span> State <span class="op">=</span> <span class="bu">dict</span>[<span class="bu">str</span>, Any]</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span> Event <span class="op">=</span> <span class="bu">dict</span>[<span class="bu">str</span>, Any]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> transition(state: State, event: Event) <span class="op">-&gt;</span> State:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  ....</span></code></pre></div>
+<p>And do something like this instead:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> State:</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">str</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EventA:</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> EventB:</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span> Event <span class="op">=</span> EventA <span class="op">|</span> EventB</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> transition(state: State, event: Event) <span class="op">-&gt;</span> SystemState:</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  ....</span></code></pre></div>
+<h3 id="when-to-use-classes"><a href="#when-to-use-classes" class="anchor fas fa-xs fa-link"></a>3. When to use classes</h3>
+<p>I use classes almost exclusively for creating generic “interfaces” for “things”
+that can have multiple implementations. These “interfaces” don’t have any mutable state,
+only <code>abstractmethod</code>s. This can be achieved with abstract base classes in python,
+I’m not a huge fan of these, so I’d be happy to learn that there’s a better way to do this!</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> abc <span class="im">import</span> ABC, abstractmethod</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Cache(ABC):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">@abstractmethod</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="bu">set</span>(<span class="va">self</span>, key: <span class="bu">str</span>, value: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">@abstractmethod</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get(<span class="va">self</span>, key: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>:</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">@abstractmethod</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> keys(<span class="va">self</span>, prefix: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> InMemoryCache(Cache):</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="bu">set</span>(<span class="va">self</span>, key: <span class="bu">str</span>, value: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>: ...</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get(<span class="va">self</span>, key: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>: ...</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> keys(<span class="va">self</span>, prefix: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]: ...</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RedisCache(Cache):</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, client: RedisClient):</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.client <span class="op">=</span> client</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="bu">set</span>(<span class="va">self</span>, key: <span class="bu">str</span>, value: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="va">None</span>: ...</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> get(<span class="va">self</span>, key: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span> <span class="op">|</span> <span class="va">None</span>: ...</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> keys(<span class="va">self</span>, prefix: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">str</span>]: ...</span></code></pre></div>
+<h3 id="use-sum-and-product-types-for-everything"><a href="#use-sum-and-product-types-for-everything" class="anchor fas fa-xs fa-link"></a>4. Use sum and product types for everything</h3>
+<p>Algebraic data types are one of the most basic programming concepts and using
+them effectively is surprisingly rare. Product types can simply be dataclasses or
+pydantic models:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Stuff:</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">int</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    c: <span class="bu">int</span></span></code></pre></div>
+<p>Sum types can be represented by a combination of dataclasses or pydantic models, and
+union types. Python recently introduced <a href="https://peps.python.org/pep-0636/">structural pattern matching</a>,
+which can be used to make working with union types both type safe and pleasant.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> dataclasses <span class="im">import</span> dataclass</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> A:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    a: <span class="bu">int</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="at">@dataclass</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> B:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    b: <span class="bu">str</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span> C <span class="op">=</span> A <span class="op">|</span> B</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> f(c: C):</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">match</span> c:</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> A(a):</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> a <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> B(b):</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="ss">f&quot;</span><span class="sc">{</span>b<span class="sc">}</span><span class="ss">!!&quot;</span></span></code></pre></div>
+<h3 id="itertools-and-functools-are-your-friends"><a href="#itertools-and-functools-are-your-friends" class="anchor fas fa-xs fa-link"></a>4. <code>itertools</code> and <code>functools</code> are your friends</h3>
+<p>Itertools provides many functions for working with <code>Iterable</code>s. These are a nice
+addition to standard library functions like <code>map</code>, <code>filter</code> and <code>sum</code>.</p>
+<p>One gripe I have is that python standard library lacks basic tools like
+<code>flatMap</code> (or <code>bind</code>, <code>chain</code>, etc…). Instead I end up with this unreadable mess:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> chain</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> duplicate[A](xs: <span class="bu">list</span>[A]) <span class="op">-&gt;</span> <span class="bu">list</span>[A]:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">list</span>(chain.from_iterable([[x, x] <span class="cf">for</span> x <span class="kw">in</span> xs]))</span></code></pre></div>
+<p>I’m aware that this could be simplified by using generators, but you get the point,
+<code>flatMap</code> is extremely useful, and I miss it daily when working with python.</p>
+<h3 id="get-familiar-with-list-set-and-dict-comprehensions."><a href="#get-familiar-with-list-set-and-dict-comprehensions." class="anchor fas fa-xs fa-link"></a>5. Get familiar with list, set and dict comprehensions.</h3>
+<p>These might be a bit unfamiliar when first coming from other languages, but are
+extremely useful, so one should get used to working with them.</p>
+<h2 id="typescript"><a href="#typescript" class="anchor fas fa-xs fa-link"></a>TypeScript</h2>
+<p>Overall, typescript is quite a pleasant system to work with. Nowadays the type system
+is actually extremely expressive even when comparing to the state of the art.
+With that said, there are still a couple pain points.</p>
+<h3 id="simulating-algebraic-data-types"><a href="#simulating-algebraic-data-types" class="anchor fas fa-xs fa-link"></a>1. Simulating algebraic data types</h3>
+<p>I often see code like this:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Thing <span class="op">=</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  state<span class="op">:</span> <span class="st">&quot;a&quot;</span> <span class="op">|</span> <span class="st">&quot;b&quot;</span><span class="op">|</span> <span class="st">&quot;c&quot;</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  a<span class="op">?:</span> <span class="dt">string</span><span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  b<span class="op">?:</span> <span class="dt">number</span><span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  c<span class="op">?:</span> <span class="bu">Date</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>and I die inside… The intention is to encode three distinct states, one where
+<code>A.state === "a"</code> and <code>A.a</code> is populated and rest of the fields are missing, and the same
+thing for states <code>b</code> and <code>c</code>. This is terrible, and is a great way to effectively
+turn off the type checker.</p>
+<p>This is clearly a place for using a sum type! Unfortunately typescript doesn’t really support
+algebraic data types out of the box. Luckily, it’s easy to simulate them:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> A <span class="op">=</span> { state<span class="op">:</span> <span class="st">&quot;a&quot;</span><span class="op">;</span> data<span class="op">:</span> <span class="dt">string</span><span class="op">;</span> }</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> B <span class="op">=</span> { state<span class="op">:</span> <span class="st">&quot;b&quot;</span><span class="op">;</span> data<span class="op">:</span> <span class="dt">number</span><span class="op">;</span> }</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> C <span class="op">=</span> { state<span class="op">:</span> <span class="st">&quot;c&quot;</span><span class="op">;</span> data<span class="op">:</span> <span class="bu">Date</span><span class="op">;</span> }</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">type</span> Thing <span class="op">=</span> A <span class="op">|</span> B <span class="op">|</span> C</span></code></pre></div>
+<p>Another thing you need when working with these sum types is exhaustivity checking.</p>
+<p>“Pattern matching” with <code>switch</code>, the <code>default:</code> case is the magic providing exhaustivity
+checking:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> doStuff<span class="op">:</span> (thing<span class="op">:</span> Thing) <span class="kw">=&gt;</span> <span class="dt">string</span> <span class="op">=</span> (thing) <span class="kw">=&gt;</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">switch</span> (thing<span class="op">.</span><span class="at">state</span>) {</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;a&quot;</span><span class="op">:</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="st">&quot;thing was a&quot;</span><span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;b&quot;</span><span class="op">:</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="st">&quot;thing was b&quot;</span><span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">case</span> <span class="st">&quot;c&quot;</span><span class="op">:</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> <span class="st">&quot;thing was c&quot;</span><span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">default</span><span class="op">:</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> _<span class="op">:</span> <span class="dt">never</span> <span class="op">=</span> thing<span class="op">;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">throw</span> <span class="kw">new</span> <span class="bu">Error</span>(_)<span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>Or if you’re willing to use a 3rd party library, you can get the same thing but with a
+somewhat nicer syntax, here we’re using <a href="https://github.com/gvergnaud/ts-pattern">ts-pattern</a>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { match } <span class="im">from</span> <span class="st">&quot;ts-pattern&quot;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> doStuff<span class="op">:</span> (thing<span class="op">:</span> Thing) <span class="kw">=&gt;</span> <span class="dt">string</span> <span class="op">=</span> (thing) <span class="kw">=&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">match</span> (thing)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">with</span>({ state<span class="op">:</span> <span class="st">&quot;a&quot;</span> }<span class="op">,</span> ({ data }) <span class="kw">=&gt;</span> <span class="st">&quot;thing was a&quot;</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">with</span>({ state<span class="op">:</span> <span class="st">&quot;b&quot;</span> }<span class="op">,</span> ({ data }) <span class="kw">=&gt;</span> <span class="st">&quot;thing was b&quot;</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">with</span>({ state<span class="op">:</span> <span class="st">&quot;c&quot;</span> }<span class="op">,</span> ({ data }) <span class="kw">=&gt;</span> <span class="st">&quot;thing was c&quot;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">exhaustive</span>()</span></code></pre></div>
+<h3 id="avoid-array-indexing-notation"><a href="#avoid-array-indexing-notation" class="anchor fas fa-xs fa-link"></a>2. Avoid array indexing notation</h3>
+<p>By default typescript will lie to your face about the type when accessing elements
+of an array with the standard indexing notation, e.g. <code>xs[3]</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> xs <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> y<span class="op">:</span> <span class="dt">number</span> <span class="op">=</span> xs[<span class="dv">10</span>]</span></code></pre></div>
+<p>TypeScript will have no complaints here. We can clearly see that <code>y</code>
+is actually undefined. TypeScript version <code>4.1</code> introduced a compiler option
+called <code>noUncheckedIndexedAccess</code>, which will change the behaviour to what
+we would expect.</p>
+<p>My new preferred way to do this is with the somewhat new <code>Array.at()</code>
+method, which works well with typescript out of the box, without any additional
+compiler options. With <code>Array.at()</code>, the following code won’t compile, as desired.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode ts"><code class="sourceCode typescript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> xs <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">const</span> y<span class="op">:</span> <span class="dt">number</span> <span class="op">=</span> xs<span class="op">.</span><span class="fu">at</span>(<span class="dv">10</span>)</span></code></pre></div>
+<p>Thanks for reading and happy hacking!</p></section>
+  </article>
+</main>
+
+<hr />
+<br />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+<br />
+]]></description>
+    <pubDate>Sat, 27 Jul 2024 11:50:00 UT</pubDate>
+    <guid>https://japiirainen.xyz/posts/staying-sane-with-python-and-typescript.html</guid>
+    <dc:creator>Joona Piirainen</dc:creator>
+</item>
+<item>
+    <title>There are no dynamic type systems.</title>
+    <link>https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html</link>
+    <description><![CDATA[<main>
+  <article>
+    <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
+      <h1>
+        <a href="/posts/there-are-no-dynamic-type-systems.html">There are no dynamic type systems.</a>
+      </h1>
+      <div>
+        <small>2024-07-26</small>
+        
+      </div>
+      <div>
+        
+        <small>types, programming-lanugages, javascript, python, haskell</small>
+        
+      </div>
+    </header>
+    <section><p>I’m writing this, since I see even the most senior developers confused about the distinction
+between the so called “dynamic” and static programming languages.
+I will argue that there are no such thing as a dynamic type system.
+What people typically think of as programming languages with a “dynamic” type system,
+such as <a href="https://www.python.org/">python</a> and <a href="https://nodejs.org">javascript</a>
+are actually nothing but a very special case of a language with a static type system.
+If you already understand this, the post you’re reading will most likely not
+provide you with any new information, but if the first paragraphs seem like nonsense
+to you, let’s see if I can get the point through!</p>
+<h2 id="one-type-to-rule-them-all"><a href="#one-type-to-rule-them-all" class="anchor fas fa-xs fa-link"></a>One type to rule them all</h2>
+<p>Advocates of dynamic languages will try to sell you on the idea that the dynamic nature
+of the language will give you <em>freedom</em>, since you don’t have to think about types,
+and that the static languages slow you down and force you to “fight” with the compiler.</p>
+<p>So what’s actually going on when working in a “dynamic” language? Well, in a “dynamic”
+language values can be of a variety of classes, and can be distinguished from each
+other at run-time. This allows the programmer to handle the different classes of values
+when writing business logic. When looking at the situation from the perspective of a type systems,
+all values of the language are of a <em>single type</em>.</p>
+<p>Instead of giving you <em>freedom</em>, the language <em>restricts</em> you to
+program with a <em>single</em>, <em>massive</em> type. Every single value is of that type.
+What this <em>restriction</em> entails, is that the programmer has no way to enforce invariants.
+Even if one is sure that a variable is of type <code>int</code> at a point
+of time in the programs execution, it is impossible to enforce this fact.
+Of course these languages give you tools to check the “tag” of a given variable during runtime.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> instanceof(x, <span class="bu">int</span>):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(x) <span class="kw">is</span> <span class="bu">int</span>:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
+<p>You can of course combine these checks with assertions, but this is not the same thing
+since these checks happen at <em>run-time</em>.</p>
+<h2 id="why-the-confusion"><a href="#why-the-confusion" class="anchor fas fa-xs fa-link"></a>Why the confusion?</h2>
+<p>This is mostly speculation, but I think the general dislike towards type systems
+and the huge popularity of languages like python and ruby might be due to the lack of
+expressive power found in type systems of mainstream statically typed languages like
+java, c#, c++ and others. I sympathise with this, but it’s an argument against bad
+languages, not statically typed ones.</p>
+<p>Thanks for reading and happy hacking!</p></section>
+  </article>
+</main>
+
+<hr />
+<br />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+<br />
+]]></description>
+    <pubDate>Fri, 26 Jul 2024 14:37:00 UT</pubDate>
+    <guid>https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html</guid>
+    <dc:creator>Joona Piirainen</dc:creator>
+</item>
+<item>
     <title>Polynomial interpolation</title>
     <link>https://japiirainen.xyz/posts/polynomial-interpolation.html</link>
     <description><![CDATA[<main>

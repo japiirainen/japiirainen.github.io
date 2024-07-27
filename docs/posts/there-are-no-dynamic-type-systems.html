@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>There are no dynamic type systems.</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Attempting to shed light on the confusion about 'dynamic' type systems." />
+    
+    <meta name="author" content="Joona Piirainen" />
+     
+    <meta name="keywords" content="types, programming-lanugages, javascript, python, haskell" />
+    
+
+    <meta property="og:site_name" content="japiirainen" />
+    <meta property="og:title" content="There are no dynamic type systems." />
+    <meta property="og:url" content="https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html" />
+    <meta property="og:description" content="Attempting to shed light on the confusion about 'dynamic' type systems." />
+     
+    <meta property="og:type" content="article" />
+    
+
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:site" content="japiirainen" />
+    <meta property="twitter:title" content="There are no dynamic type systems." />
+    <meta property="twitter:description" content="Attempting to shed light on the confusion about 'dynamic' type systems." />
+     
+
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="canonical" href="https://japiirainen.xyz/posts/there-are-no-dynamic-type-systems.html" />
+    <link rel="stylesheet" href="../css/default.css?2024-07-26" />
+    <link rel="stylesheet" href="../css/agda.css?2024-07-26" />
+    <link rel="stylesheet" href="../css/code.css?2024-07-26" />
+    <script
+      type="text/javascript"
+      src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
+    ></script>
+  </head>
+  <body>
+    <main>
+  <article>
+    <header>
+      <h2>
+        <a href="/">&#8592</a>
+      </h2>
+      <h1>
+        <a href="/posts/there-are-no-dynamic-type-systems.html">There are no dynamic type systems.</a>
+      </h1>
+      <div>
+        <small>2024-07-26</small>
+        
+      </div>
+      <div>
+        
+        <small>types, programming-lanugages, javascript, python, haskell</small>
+        
+      </div>
+    </header>
+    <section><p>I’m writing this, since I see even the most senior developers confused about the distinction
+between the so called “dynamic” and static programming languages.
+I will argue that there are no such thing as a dynamic type system.
+What people typically think of as programming languages with a “dynamic” type system,
+such as <a href="https://www.python.org/">python</a> and <a href="https://nodejs.org">javascript</a>
+are actually nothing but a very special case of a language with a static type system.
+If you already understand this, the post you’re reading will most likely not
+provide you with any new information, but if the first paragraphs seem like nonsense
+to you, let’s see if I can get the point through!</p>
+<h2 id="one-type-to-rule-them-all"><a href="#one-type-to-rule-them-all" class="anchor fas fa-xs fa-link"></a>One type to rule them all</h2>
+<p>Advocates of dynamic languages will try to sell you on the idea that the dynamic nature
+of the language will give you <em>freedom</em>, since you don’t have to think about types,
+and that the static languages slow you down and force you to “fight” with the compiler.</p>
+<p>So what’s actually going on when working in a “dynamic” language? Well, in a “dynamic”
+language values can be of a variety of classes, and can be distinguished from each
+other at run-time. This allows the programmer to handle the different classes of values
+when writing business logic. When looking at the situation from the perspective of a type systems,
+all values of the language are of a <em>single type</em>.</p>
+<p>Instead of giving you <em>freedom</em>, the language <em>restricts</em> you to
+program with a <em>single</em>, <em>massive</em> type. Every single value is of that type.
+What this <em>restriction</em> entails, is that the programmer has no way to enforce invariants.
+Even if one is sure that a variable is of type <code>int</code> at a point
+of time in the programs execution, it is impossible to enforce this fact.
+Of course these languages give you tools to check the “tag” of a given variable during runtime.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> instanceof(x, <span class="bu">int</span>):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  ...</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">type</span>(x) <span class="kw">is</span> <span class="bu">int</span>:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  ...</span></code></pre></div>
+<p>You can of course combine these checks with assertions, but this is not the same thing
+since these checks happen at <em>run-time</em>.</p>
+<h2 id="why-the-confusion"><a href="#why-the-confusion" class="anchor fas fa-xs fa-link"></a>Why the confusion?</h2>
+<p>This is mostly speculation, but I think the general dislike towards type systems
+and the huge popularity of languages like python and ruby might be due to the lack of
+expressive power found in type systems of mainstream statically typed languages like
+java, c#, c++ and others. I sympathise with this, but it’s an argument against bad
+languages, not statically typed ones.</p>
+<p>Thanks for reading and happy hacking!</p></section>
+  </article>
+</main>
+
+<hr />
+<br />
+<footer>
+  <a href="/">back</a>
+  <a href="/atom.xml">atom</a>
+  <a href="/rss.xml">rss</a>
+</footer>
+<br />
+
+    <script async src="./js/script.js"></script>
+  </body>
+</html>
