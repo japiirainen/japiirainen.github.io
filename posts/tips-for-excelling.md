@@ -1,18 +1,16 @@
 ---
 author: "Joona Piirainen"
-desc: "Tips for keeping your sanity when working with python and typescript."
+desc: "General tips to help you thrive when working with Python and TypeScript"
 keywords: "types, programming-languages, typescript, python, haskell, agda, lean4"
 lang: "en"
-title: "Staying sane while working with python and typescript"
+title: "Tips for excelling with Python and TypeScript"
 date: "2024-07-27T11:50:00Z"
 ---
 
-In this article I'll share my personal tips for keeping your sanity when working with python and
-typescript. These stem from having worked with languages with expressive type systems,
-such as [haskell](https://www.haskell.org/), [agda](https://github.com/agda/agda) and [lean4](https://github.com/leanprover/lean4).
-Unfortinutely I don't get to work with these languages daily, and for now
-I'll have to cope with more mainstream languages like python and typescript. Nevertheless,
-I have found ways to combat common issues you run into when working with these languages.
+In this article I'll share my personal tips for getting the most out of python and
+typescript. These tips stem from me trying to incorporate the most valuable features
+from languages such as [haskell](https://www.haskell.org/), [agda](https://github.com/agda/agda) and [lean4](https://github.com/leanprover/lean4)
+to more mundane but widely used languages.
 
 ## Python
 

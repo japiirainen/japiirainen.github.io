@@ -3,7 +3,7 @@ author: "Joona Piirainen"
 desc: "Attempting to shed light on the confusion about 'dynamic' type systems."
 keywords: "types, programming-lanugages, javascript, python, haskell"
 lang: "en"
-title: "There are no dynamic type systems."
+title: "There are no dynamic type systems"
 date: "2024-07-26T14:37:00Z"
 ---
 
